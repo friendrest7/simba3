@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450">
+  <rect width="600" height="450" fill="#fff8d8"/>
+  <rect x="255" y="45" width="90" height="55" rx="12" fill="#d94b1b"/>
+  <path d="M230 93h140l35 63v224H195V156z" fill="#f6c72c" fill-opacity=".82" stroke="#d9a50c" stroke-width="8"/>
+  <rect x="215" y="190" width="170" height="110" rx="18" fill="#fff"/>
+  <circle cx="300" cy="230" r="27" fill="#f0b323"/>
+  <path d="M300 201c24 27 24 47 0 60-24-13-24-33 0-60z" fill="#16865c"/>
+  <text x="300" y="284" text-anchor="middle" font-family="Arial" font-size="25" font-weight="900" fill="#7a5b00">COOKING OIL</text>
+</svg>

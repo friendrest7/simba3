@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450">
+  <rect width="600" height="450" fill="#e8f8ff"/>
+  <rect x="260" y="42" width="80" height="48" rx="10" fill="#236fc1"/>
+  <path d="M245 83h110l32 78v205c0 25-19 42-43 42h-88c-24 0-43-17-43-42V161z" fill="#bdeaff" fill-opacity=".65" stroke="#69bfe9" stroke-width="8"/>
+  <path d="M218 252c55-31 109 30 169-3v110c0 28-17 49-43 49h-88c-25 0-43-20-43-48z" fill="#49b8ec" fill-opacity=".65"/>
+  <text x="300" y="220" text-anchor="middle" font-family="Arial" font-size="35" font-weight="900" fill="#236fc1">PURE</text>
+  <text x="300" y="258" text-anchor="middle" font-family="Arial" font-size="25" font-weight="700" fill="#236fc1">WATER</text>
+</svg>

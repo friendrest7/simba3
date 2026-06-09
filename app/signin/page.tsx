@@ -1,0 +1,4 @@
+import Image from "next/image";
+import { Suspense } from "react";
+import { AuthForm } from "@/components/auth-form";
+export default function SignInPage() { return <div className="grid min-h-[760px] lg:grid-cols-2"><div className="flex items-center justify-center px-5 py-16"><Suspense fallback={<div className="text-sm text-muted">Loading sign in...</div>}><AuthForm mode="signin" /></Suspense></div><div className="relative hidden lg:block"><Image src="/images/7.jpg" alt="Fresh global market" fill className="object-cover" sizes="50vw" /><div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" /><div className="absolute bottom-12 left-12 max-w-md text-white"><p className="text-3xl font-black">Shop globally.<br />Feel at home.</p><p className="mt-3 text-sm leading-6 text-white/70">Trusted sellers, protected payments, and delivery you can follow.</p></div></div></div>; }

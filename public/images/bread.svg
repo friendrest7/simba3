@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450">
+  <rect width="600" height="450" fill="#fff5dc"/>
+  <path d="M125 285c0-104 71-178 175-178s175 74 175 178v72H125z" fill="#d9953b" stroke="#9b6425" stroke-width="8"/>
+  <path d="M177 221c35-31 69-42 102-42M285 179c35 8 65 23 91 51M207 286c56-31 118-31 185 0" fill="none" stroke="#f6cf87" stroke-width="17" stroke-linecap="round"/>
+  <text x="300" y="406" text-anchor="middle" font-family="Arial" font-size="30" font-weight="800" fill="#7a4a1e">FRESH BAKERY</text>
+</svg>
