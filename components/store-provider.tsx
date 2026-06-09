@@ -55,7 +55,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cartPanelOpen, setCartPanelOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [accent, setAccentState] = useState<Accent>("red");
+  const [accent, setAccentState] = useState<Accent>("amber");
   const [currency, setCurrencyState] = useState<CurrencyCode>("RWF");
   const [selectedBranchId, setSelectedBranchIdState] = useState("kigali-kic");
   const [language, setLanguageState] = useState<LanguageCode>("en");
