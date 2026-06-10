@@ -80,7 +80,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .landing-backdrop {
   background:
     linear-gradient(rgb(var(--canvas) / .76), rgb(var(--canvas) / .76)),
-    url("/images/landing.jpg") center / cover fixed;
+    url("/images/hero_image.png") center / cover fixed;
 }
 
 @keyframes landing-ticker {

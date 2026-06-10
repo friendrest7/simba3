@@ -10,9 +10,16 @@ export default function Home() {
     <div className="landing-backdrop">
       <section className="border-b border-line bg-white/90 dark:bg-[#151619]/90">
         <div className="relative min-h-[760px] overflow-hidden text-white">
-          <Image src="/images/landing.jpg" alt="" fill priority className="object-cover object-center" sizes="100vw" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,25,24,.64)_0%,rgba(0,25,24,.42)_38%,rgba(0,25,24,.10)_68%,rgba(0,25,24,.03)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,20,19,.18)_0%,transparent_38%,rgba(0,0,0,.03)_100%)]" />
+          <Image
+            src="/images/hero_image.png"
+            alt="Simba Supermarket storefront at sunset"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,8,12,.78)_0%,rgba(10,8,12,.56)_38%,rgba(10,8,12,.14)_68%,rgba(10,8,12,.04)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(10,8,12,.38)_0%,transparent_45%,rgba(0,0,0,.08)_100%)]" />
           <div className="relative mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-10 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:px-10">
             <div className="max-w-3xl">
               <span className="inline-flex rounded-full border border-white/20 bg-black/10 px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-[#a8e6f7] backdrop-blur-sm">Simba online supermarket</span>

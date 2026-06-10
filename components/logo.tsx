@@ -7,7 +7,7 @@ export function Logo({ inverse = false }: { inverse?: boolean }) {
       className={`relative block shrink-0 overflow-hidden bg-white ${
         inverse
           ? "h-[74px] w-[58px] rounded-md p-1"
-          : "h-[66px] w-[52px] rounded-md border border-white/70 p-0.5 shadow-sm"
+          : "h-12 w-10 rounded-md border border-white/70 p-0.5 shadow-sm sm:h-[66px] sm:w-[52px]"
       }`}
       aria-label="Simba Supermarket home"
     >
