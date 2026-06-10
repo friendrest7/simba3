@@ -197,7 +197,7 @@ export function ShopClient() {
           </div>
         </div>
         <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="form-input sm:max-w-[300px]" aria-label="Change Simba branch">
-          {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}
+          {branches.map((branch) => <option className="bg-white text-black" key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}
         </select>
       </section>
 

@@ -62,7 +62,7 @@ export function Header() {
               {languages.map(([code, label]) => <option className="bg-white text-black" key={code} value={code}>{label}</option>)}
             </select>
           </label>
-          <label className="relative hidden h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/30 bg-white/10 text-white transition hover:bg-white/15 xl:flex" title={`Shopping branch: ${branches.find((branch) => branch.id === selectedBranchId)?.name || "Choose branch"}`}>
+          <label className="relative hidden h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/30 bg-white text-black transition hover:bg-white/90 xl:flex" title={`Shopping branch: ${branches.find((branch) => branch.id === selectedBranchId)?.name || "Choose branch"}`}>
             <MapPin className="h-3.5 w-3.5" />
             <select
               value={selectedBranchId}
@@ -70,7 +70,7 @@ export function Header() {
               className="absolute inset-0 cursor-pointer opacity-0"
               aria-label="Shopping branch"
             >
-              {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.province}</option>)}
+              {branches.map((branch) => <option className="bg-white text-black" key={branch.id} value={branch.id}>{branch.name} - {branch.province}</option>)}
             </select>
           </label>
           <a
@@ -151,7 +151,7 @@ export function Header() {
                 className="h-11 w-full rounded-md border border-white/25 bg-white pl-10 pr-3 text-sm font-bold text-[#1b1b1b]"
                 aria-label="Shopping branch"
               >
-                {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}
+                {branches.map((branch) => <option className="bg-white text-black" key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}
               </select>
             </label>
             <div className="mb-4 grid grid-cols-2 gap-2">
