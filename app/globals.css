@@ -10,6 +10,7 @@
   --line: 224 224 220;
 }
 
+:root[data-accent="red"] { --brand: 225 29 46; }
 :root[data-accent="green"] { --brand: 22 134 92; }
 :root[data-accent="blue"] { --brand: 37 99 235; }
 :root[data-accent="purple"] { --brand: 126 58 242; }
