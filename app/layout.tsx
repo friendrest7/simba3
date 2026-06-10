@@ -10,7 +10,7 @@ import { PageTranslator } from "@/components/page-translator";
 
 export const metadata: Metadata = {
   title: "Simba Marketplace | Shop the world with trust",
-  description: "Shop fresh groceries and Simba favourites from Rwanda branches with secure checkout and trackable delivery.",
+  description: "Shop high definition products and Simba favourites from Rwanda branches with secure checkout and trackable delivery.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

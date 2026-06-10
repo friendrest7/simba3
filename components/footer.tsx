@@ -14,7 +14,7 @@ const footerGroups = [
     title: "Shop",
     links: [
       ["Fresh produce", "/shop?category=Fruits"],
-      ["Groceries", "/shop?category=Groceries"],
+      ["High definition products", "/shop?category=Groceries"],
       ["Simba favourites", "/shop?category=Simba%20Favourites"],
       ["Weekly deals", "/shop"],
     ],
@@ -45,7 +45,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-[1440px] gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-10">
         <div className="max-w-sm">
           <Logo inverse />
-          <p className="mt-5 text-sm leading-7 text-white/60">Fresh groceries, everyday essentials, secure payments, and trackable delivery from Simba branches across Rwanda.</p>
+          <p className="mt-5 text-sm leading-7 text-white/60">High definition products, everyday essentials, secure payments, and trackable delivery from Simba branches across Rwanda.</p>
           <div className="mt-6 flex gap-2">
             {socialLinks.map(({ label, href, Icon }) => (
               <a

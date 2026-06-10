@@ -27,7 +27,7 @@ export default function Home() {
                 Freshness,<br />right at home.
               </h1>
               <p className="mt-7 max-w-2xl font-serif text-lg text-white/80 sm:text-2xl">
-                Groceries, everyday essentials and Simba favourites delivered from our market to your door.
+                High definition products, everyday essentials and Simba favourites delivered from our market to your door.
               </p>
               <form action="/shop" className="mt-8 flex h-16 w-full max-w-2xl overflow-hidden rounded-full border border-white/30 bg-white/95 text-[#171719] shadow-[0_8px_24px_rgba(0,0,0,.10)]">
                 <Search className="ml-6 mt-[22px] h-5 w-5 shrink-0 text-brand" />
