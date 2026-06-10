@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 
-type Role = "client" | "driver" | "manager" | "admin";
+type Role = "client" | "driver" | "manager" | "admin" | "ceo";
 
 const roleLabels: Record<Role, string> = {
   client: "customer",
   driver: "driver",
   manager: "branch manager",
   admin: "general manager",
+  ceo: "Africa chief executive officer",
 };
 
 const recentSends = new Map<string, number>();

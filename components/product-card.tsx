@@ -12,7 +12,7 @@ export function ProductCard({ product }: { product: Product }) {
   const branchStock = getBranchStock(product, selectedBranchId);
   const soldOut = branchStock === 0;
   const saved = savedProductIds.includes(product.id);
-  const containedImage = product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-");
+  const containedImage = product.id.startsWith("catalog-") || product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-");
   const productHref = product.managerCreated ? `/shop?q=${encodeURIComponent(product.name)}` : `/products/${product.id}`;
   return (
     <article className={`group min-w-0 rounded-xl border border-transparent p-2 transition duration-300 hover:-translate-y-1 hover:border-line hover:bg-canvas hover:shadow-[0_14px_35px_rgba(0,0,0,.08)] ${soldOut ? "opacity-75" : ""}`}>

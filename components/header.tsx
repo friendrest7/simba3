@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, Home, Languages, LayoutDashboard, LogIn, MapPin, Menu, Moon, PhoneCall, Search, Sun, X } from "lucide-react";
+import { ChevronDown, Languages, MapPin, Menu, Moon, PhoneCall, Search, Sun, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./logo";
 import { LanguageCode, useStore } from "./store-provider";
@@ -10,7 +10,6 @@ import { branches, currencyOptions, CurrencyCode } from "@/lib/data";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dashboardsOpen, setDashboardsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = usePathname();
   const router = useRouter();
@@ -19,12 +18,6 @@ export function Header() {
   const callCenterHref = `tel:${selectedBranch.phone.replace(/[^\d+]/g, "")}`;
   const links = [[t("marketplace"), "/shop"], [t("deals"), "/shop?category=Fruits"], [t("track"), "/dashboard/client"]];
   const languages: Array<[LanguageCode, string]> = [["en", "English"], ["fr", "Français"], ["sw", "Kiswahili"], ["am", "አማርኛ"], ["tr", "Türkçe"], ["zh", "中文"]];
-  const dashboards = [
-    ["client", "Client dashboard", "/dashboard/client"],
-    ["driver", "Driver dashboard", "/dashboard/driver"],
-    ["manager", "Manager dashboard", "/dashboard/manager"],
-    ["admin", "General manager", "/dashboard/admin"],
-  ] as const;
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -46,23 +39,8 @@ export function Header() {
             {links.map(([label, href]) => (
               <Link key={href} href={href} className={`relative py-2 text-sm font-bold transition after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-white after:transition-all ${pathname === href ? "text-white after:w-full" : "text-white/80 after:w-0 hover:text-white hover:after:w-full"}`}>{label}</Link>
             ))}
-            <div className="relative">
-              <button onClick={() => setDashboardsOpen((value) => !value)} className="flex items-center gap-1 py-2 text-sm font-bold text-white/80 hover:text-white">
-                {t("dashboards")} <ChevronDown className={`h-4 w-4 transition ${dashboardsOpen ? "rotate-180" : ""}`} />
-              </button>
-              {dashboardsOpen && (
-                <div className="absolute left-0 top-full z-50 mt-3 w-72 rounded-xl border border-line bg-canvas p-2 text-ink shadow-2xl">
-                  {user && <div className="mb-2 rounded-lg bg-brand/10 p-3"><p className="text-[10px] font-black uppercase text-brand">Signed in</p><p className="mt-1 text-xs font-black">{user.name}</p><p className="mt-1 text-[10px] capitalize text-muted">{user.role === "admin" ? "General manager" : user.role}</p></div>}
-                  {dashboards.map(([role, label, href]) => {
-                    const hasAccess = user?.role === role;
-                    const destination = hasAccess ? href : `/signin?next=${encodeURIComponent(href)}`;
-                    return <Link key={role} href={destination} onClick={() => setDashboardsOpen(false)} className="flex items-center justify-between rounded-lg px-3 py-3 text-xs font-bold transition hover:bg-brand/10 hover:text-brand"><span className="flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />{label}</span>{!hasAccess && <LogIn className="h-3.5 w-3.5" />}</Link>;
-                  })}
-                </div>
-              )}
-            </div>
           </nav>
-          <form onSubmit={submitSearch} className="relative ml-auto hidden max-w-xl flex-1 xl:block">
+          <form onSubmit={submitSearch} className="relative ml-auto hidden min-w-[260px] flex-1 xl:block">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a9a9a]" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search")} className="h-11 w-full rounded-md border border-white/25 bg-white pl-11 pr-12 text-sm text-[#1b1b1b] shadow-sm outline-none transition placeholder:text-[#777] focus:border-white focus:ring-2 focus:ring-white/25" />
             <button className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded bg-[#16865c] text-white" title="Search products"><Search className="h-4 w-4" /></button>
@@ -78,7 +56,7 @@ export function Header() {
               {Object.keys(currencyOptions).map((code) => <option className="bg-white text-black" key={code} value={code}>{code === "RWF" ? "RWF - Rwandan Franc" : code}</option>)}
             </select>
           </label>
-          <label className="relative hidden h-10 min-w-[58px] cursor-pointer items-center justify-center gap-1 rounded-md border border-white/35 bg-white/10 px-2 text-xs font-black text-white transition hover:bg-white/15 lg:flex" title={t("language")}>
+          <label className="relative hidden h-10 min-w-[58px] cursor-pointer items-center justify-center gap-1 rounded-md border border-white/35 bg-white/10 px-2 text-xs font-black text-white transition hover:bg-white/15 xl:flex" title={t("language")}>
             <Languages className="h-4 w-4" /><span className="uppercase">{language}</span><ChevronDown className="h-3 w-3" />
             <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="absolute inset-0 cursor-pointer opacity-0" aria-label={t("language")}>
               {languages.map(([code, label]) => <option className="bg-white text-black" key={code} value={code}>{label}</option>)}
@@ -107,7 +85,6 @@ export function Header() {
           <button onClick={toggleTheme} className="icon-button hidden !text-white hover:!border-white/30 hover:!bg-white/10 xl:grid" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}>
             {theme === "light" ? <Moon /> : <Sun />}
           </button>
-          <Link href="/" className="hidden h-10 shrink-0 items-center gap-2 rounded-md border border-white/35 bg-white/10 px-3 text-xs font-black text-white transition hover:bg-white/15 xl:flex"><Home className="h-4 w-4" /> {t("home")}</Link>
           {user ? (
             <button
               onClick={() => {
@@ -188,14 +165,6 @@ export function Header() {
               </button>
             </div>
             {links.map(([label, href]) => <Link onClick={() => setMenuOpen(false)} key={href} href={href} className="block border-b border-white/15 py-3 text-sm font-bold text-white/85 hover:text-white">{label}</Link>)}
-            <div className="mt-4 rounded-md border border-white/20 p-3">
-              <p className="mb-2 text-[10px] font-black uppercase text-white/60">Dashboards {user ? `- ${user.role === "admin" ? "General manager" : user.role}` : ""}</p>
-              {dashboards.map(([role, label, href]) => {
-                const hasAccess = user?.role === role;
-                const destination = hasAccess ? href : `/signin?next=${encodeURIComponent(href)}`;
-                return <Link key={role} href={destination} onClick={() => setMenuOpen(false)} className="flex items-center justify-between py-2 text-xs font-bold text-white">{label}{!hasAccess && <LogIn className="h-3.5 w-3.5" />}</Link>;
-              })}
-            </div>
             {user ? (
               <button onClick={() => { signOut(); setMenuOpen(false); router.push("/"); }} className="mt-4 flex h-11 w-full items-center justify-center rounded-md bg-white text-sm font-black text-brand">{t("signout")}</button>
             ) : (

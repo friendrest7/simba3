@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { branches, CurrencyCode, Product } from "@/lib/data";
 
 export type CartItem = { product: Product; quantity: number };
-type User = { name: string; email: string; role: "client" | "admin" | "manager" | "driver"; branchId?: string; driverId?: string };
+type User = { name: string; email: string; role: "client" | "admin" | "manager" | "driver" | "ceo"; branchId?: string; driverId?: string };
 export type Accent = "red" | "green" | "blue" | "purple" | "amber" | "teal";
 export type LanguageCode = "en" | "fr" | "sw" | "am" | "tr" | "zh";
 

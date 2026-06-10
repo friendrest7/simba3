@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Banknote, Bot, Building2, Loader2, MapPin, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "./product-card";
-import { branches, products } from "@/lib/data";
+import { branches, Product } from "@/lib/data";
+import { searchProducts } from "@/lib/product-search";
 import { useStore } from "./store-provider";
 
 export function ShopClient() {
@@ -22,8 +23,16 @@ export function ShopClient() {
   const [searchInsight, setSearchInsight] = useState("");
   const [searching, setSearching] = useState(false);
   const [sort, setSort] = useState("featured");
-  const marketplaceProducts = useMemo(() => [...managedProducts, ...products], [managedProducts]);
-  const categories = ["All", ...Array.from(new Set(marketplaceProducts.map((product) => product.category)))];
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
+  const [catalogCategories, setCatalogCategories] = useState<string[]>(["All"]);
+  const [catalogTotal, setCatalogTotal] = useState(0);
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogHasMore, setCatalogHasMore] = useState(false);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const categories = useMemo(
+    () => Array.from(new Set([...catalogCategories, ...managedProducts.map((product) => product.category)])),
+    [catalogCategories, managedProducts],
+  );
   const priceRanges = [
     { label: "All prices", caption: "Full marketplace", color: "border-[#d94b1b]" },
     { label: "Under FRw 2,000", caption: "Quick essentials", color: "border-[#16865c]" },
@@ -37,31 +46,84 @@ export function ShopClient() {
     setDraftQuery(nextQuery);
     setQuery(nextQuery);
     setCategory(params.get("category") || "All");
+    setCatalogPage(1);
   }, [params]);
 
-  const filtered = useMemo(() => marketplaceProducts.filter((product) =>
-    (category === "All" || product.category.toLowerCase().includes(category.toLowerCase())) &&
-    `${product.name} ${product.category} ${product.seller}`.toLowerCase().includes(query.toLowerCase()) &&
-    (() => {
-      const rwf = product.price * 1450;
-      if (priceRange === "Under FRw 2,000") return rwf < 2000;
-      if (priceRange === "FRw 2,000 - 10,000") return rwf >= 2000 && rwf <= 10000;
-      if (priceRange === "FRw 10,000 - 30,000") return rwf > 10000 && rwf <= 30000;
-      if (priceRange === "FRw 30,000+") return rwf > 30000;
-      return true;
-    })()
-  ).sort((a, b) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    const requestParams = new URLSearchParams({
+      q: query,
+      category,
+      price: priceRange,
+      sort,
+      page: String(catalogPage),
+    });
+    setCatalogLoading(true);
+
+    fetch(`/api/products?${requestParams.toString()}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Catalog request failed.");
+        return response.json();
+      })
+      .then((data: {
+        products?: Product[];
+        categories?: string[];
+        total?: number;
+        hasMore?: boolean;
+      }) => {
+        const nextProducts = Array.isArray(data.products) ? data.products : [];
+        setCatalogProducts((current) => catalogPage === 1 ? nextProducts : [...current, ...nextProducts]);
+        if (Array.isArray(data.categories)) setCatalogCategories(data.categories);
+        setCatalogTotal(typeof data.total === "number" ? data.total : nextProducts.length);
+        setCatalogHasMore(Boolean(data.hasMore));
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (catalogPage === 1) setCatalogProducts([]);
+        setCatalogHasMore(false);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCatalogLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [query, category, priceRange, sort, catalogPage]);
+
+  const managedMatches = useMemo(() => {
+    const candidates = managedProducts.filter((product) =>
+      (category === "All" || product.category.toLowerCase().includes(category.toLowerCase())) &&
+      (() => {
+        const rwf = product.price * 1450;
+        if (priceRange === "Under FRw 2,000") return rwf < 2000;
+        if (priceRange === "FRw 2,000 - 10,000") return rwf >= 2000 && rwf <= 10000;
+        if (priceRange === "FRw 10,000 - 30,000") return rwf > 10000 && rwf <= 30000;
+        if (priceRange === "FRw 30,000+") return rwf > 30000;
+        return true;
+      })()
+    );
+    const searched = query.trim() ? searchProducts(candidates, query) : candidates;
+
+    return [...searched].sort((a, b) => {
     if (sort === "price-low") return a.price - b.price;
     if (sort === "price-high") return b.price - a.price;
     if (sort === "rating") return b.rating - a.rating;
     if (sort === "stock") return b.stock - a.stock;
+    if (query.trim()) return 0;
     return Number(Boolean(b.badge)) - Number(Boolean(a.badge)) || b.reviews - a.reviews;
-  }), [query, category, priceRange, sort, marketplaceProducts]);
+    });
+  }, [query, category, priceRange, sort, managedProducts]);
+
+  const displayedProducts = useMemo(
+    () => [...managedMatches, ...catalogProducts],
+    [managedMatches, catalogProducts],
+  );
+  const resultCount = catalogTotal + managedMatches.length;
 
   async function submitSearch(event: React.FormEvent) {
     event.preventDefault();
     const nextQuery = draftQuery.trim();
     setQuery(nextQuery);
+    setCatalogPage(1);
     setSearchInsight("");
 
     const nextParams = new URLSearchParams(params.toString());
@@ -86,7 +148,7 @@ export function ShopClient() {
         }),
       });
       const data = await response.json();
-      setSearchInsight(data.reply || `I found ${filtered.length} related products.`);
+      setSearchInsight(data.reply || `I found ${resultCount} related products.`);
     } catch {
       setSearchInsight(`I filtered the marketplace for "${nextQuery}". You can refine by category, budget, or branch.`);
     } finally {
@@ -164,11 +226,11 @@ export function ShopClient() {
             <span className="grid h-10 w-10 place-items-center rounded-md bg-[#f0b323]/15 text-[#a87400]"><Banknote className="h-5 w-5" /></span>
             <div><h2 className="text-sm font-black">Shop by budget</h2><p className="mt-1 text-[11px] text-muted">Choose a comfortable price range for your Rwanda order.</p></div>
           </div>
-          <span className="rounded-md bg-[#16865c]/10 px-3 py-2 text-xs font-black text-[#16865c]">{filtered.length} products in budget</span>
+          <span className="rounded-md bg-[#16865c]/10 px-3 py-2 text-xs font-black text-[#16865c]">{resultCount} products in budget</span>
         </div>
         <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-5">
           {priceRanges.map((range) => (
-            <button key={range.label} onClick={() => setPriceRange(range.label)} className={`min-h-24 border-b-4 bg-canvas px-4 py-4 text-left transition hover:bg-black/[.025] dark:hover:bg-white/[.04] ${range.color} ${priceRange === range.label ? "bg-black/[.04] dark:bg-white/[.08]" : ""}`}>
+            <button key={range.label} onClick={() => { setPriceRange(range.label); setCatalogPage(1); }} className={`min-h-24 border-b-4 bg-canvas px-4 py-4 text-left transition hover:bg-black/[.025] dark:hover:bg-white/[.04] ${range.color} ${priceRange === range.label ? "bg-black/[.04] dark:bg-white/[.08]" : ""}`}>
               <p className="text-sm font-black">{range.label}</p><p className="mt-2 text-[10px] text-muted">{range.caption}</p>
             </button>
           ))}
@@ -183,7 +245,7 @@ export function ShopClient() {
         </form>
         <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
           {categories.map((item) => (
-            <button onClick={() => setCategory(item)} key={item} className={`h-10 shrink-0 rounded-md px-4 text-xs font-bold ${category === item ? "bg-ink text-canvas" : "border border-line"}`}>
+            <button onClick={() => { setCategory(item); setCatalogPage(1); }} key={item} className={`h-10 shrink-0 rounded-md px-4 text-xs font-bold ${category === item ? "bg-ink text-canvas" : "border border-line"}`}>
               {item}
             </button>
           ))}
@@ -204,11 +266,11 @@ export function ShopClient() {
       )}
 
       <div className="mt-8 flex items-center justify-between">
-        <p className="text-sm text-muted"><b className="text-ink">{filtered.length}</b> products found</p>
+        <p className="text-sm text-muted"><b className="text-ink">{resultCount}</b> products found</p>
         <label className="flex items-center gap-2 text-xs font-bold">
           <SlidersHorizontal className="h-4 w-4" />
           <span className="sr-only sm:not-sr-only">Sort</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value)} className="rounded-md border border-line bg-canvas px-3 py-2 text-xs font-bold outline-none">
+          <select value={sort} onChange={(event) => { setSort(event.target.value); setCatalogPage(1); }} className="rounded-md border border-line bg-canvas px-3 py-2 text-xs font-bold outline-none">
             <option value="featured">Featured</option>
             <option value="price-low">Price: low to high</option>
             <option value="price-high">Price: high to low</option>
@@ -218,10 +280,21 @@ export function ShopClient() {
         </label>
       </div>
 
-      {filtered.length ? (
-        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-7">
-          {filtered.map((product) => <ProductCard key={product.id} product={product} />)}
-        </div>
+      {displayedProducts.length ? (
+        <>
+          <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-7">
+            {displayedProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+          </div>
+          {catalogHasMore && (
+            <div className="mt-12 text-center">
+              <button disabled={catalogLoading} onClick={() => setCatalogPage((current) => current + 1)} className="button-secondary min-w-44 disabled:opacity-60">
+                {catalogLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Loading products...</> : "Load more products"}
+              </button>
+            </div>
+          )}
+        </>
+      ) : catalogLoading ? (
+        <div className="flex items-center justify-center gap-2 py-24 text-sm font-bold text-muted"><Loader2 className="h-5 w-5 animate-spin text-brand" /> Loading Simba products...</div>
       ) : (
         <div className="py-24 text-center">
           <h2 className="text-xl font-black">No products found</h2>

@@ -16,13 +16,14 @@ import { useStore } from "./store-provider";
 import { branches } from "@/lib/data";
 
 type AuthMethod = "email" | "phone";
-type Role = "client" | "admin" | "manager" | "driver";
+type Role = "client" | "admin" | "manager" | "driver" | "ceo";
 
 const dashboardRoles: Record<string, Role> = {
   client: "client",
   driver: "driver",
   manager: "manager",
   admin: "admin",
+  ceo: "ceo",
 };
 
 const roleLabels: Record<Role, string> = {
@@ -30,13 +31,23 @@ const roleLabels: Record<Role, string> = {
   driver: "Driver",
   manager: "Branch manager",
   admin: "General manager",
+  ceo: "Africa CEO",
 };
 
 const demoStaffCredentials: Record<Exclude<Role, "client">, { email: string; password: string }> = {
   driver: { email: "driver@simba.market", password: "simba123" },
   manager: { email: "manager@simba.market", password: "simba123" },
   admin: { email: "admin@simba.market", password: "simba123" },
+  ceo: { email: "ceo@simba.market", password: "simba123" },
 };
+
+const demoAccounts: Array<{ role: Role; label: string; email: string; password: string }> = [
+  { role: "client", label: "Customer", email: "client@simba.market", password: "simba123" },
+  { role: "driver", label: "Driver", ...demoStaffCredentials.driver },
+  { role: "manager", label: "Branch manager", ...demoStaffCredentials.manager },
+  { role: "admin", label: "General manager", ...demoStaffCredentials.admin },
+  { role: "ceo", label: "Africa CEO", ...demoStaffCredentials.ceo },
+];
 
 function GoogleMark() {
   return (
@@ -167,6 +178,13 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     }, 500);
   }
 
+  function selectDemoAccount(account: (typeof demoAccounts)[number]) {
+    setMethod("email");
+    setEmail(account.email);
+    setPassword(account.password);
+    setAuthError("");
+  }
+
   return (
     <form onSubmit={submit} className="w-full max-w-md">
       <span className="eyebrow">{staffLogin ? `${roleLabels[requestedRole]} access` : isSignUp ? "Join the marketplace" : "Welcome back"}</span>
@@ -180,6 +198,35 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           ? "Start shopping, selling, and tracking deliveries in minutes."
           : "Signing in is optional while browsing and required only when you checkout or open a dashboard."}
       </p>
+
+      {!isSignUp && !staffLogin && (
+        <section className="mt-6 rounded-md border border-line bg-black/[.025] p-4 dark:bg-white/[.04]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black">Default test accounts</p>
+              <p className="mt-1 text-[10px] text-muted">Select an account to fill the sign-in form.</p>
+            </div>
+            <span className="rounded-full bg-brand/10 px-3 py-1 text-[10px] font-black text-brand">Password: simba123</span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {demoAccounts.map((account) => (
+              <button
+                type="button"
+                key={account.role}
+                onClick={() => selectDemoAccount(account)}
+                className={`rounded-md border p-3 text-left transition ${
+                  email.trim().toLowerCase() === account.email
+                    ? "border-brand bg-brand/10"
+                    : "border-line bg-canvas hover:border-brand/40"
+                }`}
+              >
+                <span className="block text-[10px] font-black uppercase text-brand">{account.label}</span>
+                <span className="mt-1 block truncate text-[11px] font-bold">{account.email}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {staffLogin && (
         <div className="mt-5 rounded-md border border-[#16865c]/25 bg-[#16865c]/10 p-4 text-xs text-[#116344]">

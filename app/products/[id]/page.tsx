@@ -5,6 +5,7 @@ import { BadgeCheck, ChevronRight, MapPin, RotateCcw, ShieldCheck, Star, Truck }
 import { AddToCart } from "@/components/add-to-cart";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/data";
+import { allProducts } from "@/lib/catalog-products";
 import { Price } from "@/components/price";
 import { BranchAvailability } from "@/components/branch-availability";
 
@@ -14,16 +15,16 @@ export function generateStaticParams() {
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = products.find((item) => item.id === id);
+  const product = allProducts.find((item) => item.id === id);
   if (!product) notFound();
   const soldOut = product.availability === "sold-out" || product.stock === 0;
-  const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4);
+  const related = allProducts.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4);
 
   return (
     <div className="mx-auto max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10">
       <div className="mb-8 flex items-center gap-2 text-xs text-muted"><Link href="/shop">Marketplace</Link><ChevronRight className="h-3 w-3" /><span>{product.category}</span><ChevronRight className="h-3 w-3" /><span className="text-ink">{product.name}</span></div>
       <div className="grid gap-10 lg:grid-cols-[1.15fr_.85fr] lg:gap-16">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-white"><Image src={product.image} alt={product.name} fill priority className={product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-") ? "object-contain p-8" : "object-cover"} sizes="60vw" /></div>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-white"><Image src={product.image} alt={product.name} fill priority className={product.id.startsWith("catalog-") || product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-") ? "object-contain p-8" : "object-cover"} sizes="60vw" /></div>
         <div className="flex flex-col justify-center">
           {product.badge && <span className="eyebrow">{product.badge}</span>}
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{product.name}</h1>

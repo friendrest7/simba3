@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-type StaffRole = "driver" | "manager" | "admin";
+type StaffRole = "driver" | "manager" | "admin" | "ceo";
 
 const demoPassword = "simba123";
 const staffCredentials: Record<StaffRole, { email: string; password: string }> = {
@@ -16,6 +16,10 @@ const staffCredentials: Record<StaffRole, { email: string; password: string }> =
     email: process.env.STAFF_GENERAL_MANAGER_EMAIL || "admin@simba.market",
     password: process.env.STAFF_GENERAL_MANAGER_PASSWORD || demoPassword,
   },
+  ceo: {
+    email: process.env.STAFF_CEO_EMAIL || "ceo@simba.market",
+    password: process.env.STAFF_CEO_PASSWORD || demoPassword,
+  },
 };
 
 export async function POST(request: Request) {
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
   const role = body?.role as StaffRole;
   const credential = staffCredentials[role];
 
-  if (!credential || !["driver", "manager", "admin"].includes(role)) {
+  if (!credential || !["driver", "manager", "admin", "ceo"].includes(role)) {
     return NextResponse.json({ error: "Invalid staff portal." }, { status: 400 });
   }
   if (email !== credential.email.toLowerCase() || password !== credential.password) {

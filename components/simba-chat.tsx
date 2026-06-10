@@ -25,7 +25,7 @@ export function SimbaChat() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"groq" | "local" | null>(null);
+  const [mode, setMode] = useState<"gemini" | "local" | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -101,7 +101,7 @@ export function SimbaChat() {
                 <p className="text-sm font-black">Simba AI</p>
                 <p className="mt-0.5 flex items-center gap-1 text-[10px] text-white/75">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#79e2ac]" />
-                  {mode === "groq" ? "Powered by Groq" : mode === "local" ? "Smart fallback mode" : "Ready to help"}
+                  {mode === "gemini" ? "Powered by Gemini" : mode === "local" ? "Smart catalog mode" : "Ready to help"}
                 </p>
               </div>
             </div>
