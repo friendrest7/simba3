@@ -47,8 +47,8 @@ export default function CeoDashboard() {
   const [period, setPeriod] = useState<keyof typeof periods>("This month");
   const [selectedRegion, setSelectedRegion] = useState("All Africa");
   const [notice, setNotice] = useState("");
-  const multiplier = periods[period];
-  const markets = selectedRegion === "All Africa"
+  const multiplier: number = periods[period];
+  const markets: ReadonlyArray<(typeof africaMarkets)[number]> = selectedRegion === "All Africa"
     ? africaMarkets
     : africaMarkets.filter((market) => market.region === selectedRegion);
 

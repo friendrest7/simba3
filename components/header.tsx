@@ -33,19 +33,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/20 bg-brand text-white shadow-[0_4px_18px_rgba(0,0,0,0.18)]">
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-3 sm:h-20 sm:gap-3 sm:px-6 lg:gap-5 lg:px-10">
+        <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-2 px-3 sm:h-[72px] sm:px-5 lg:px-7">
           <Logo />
-          <nav className="hidden items-center gap-6 xl:flex">
+          <nav className="hidden shrink-0 items-center gap-4 xl:flex">
             {links.map(([label, href]) => (
-              <Link key={href} href={href} className={`relative py-2 text-sm font-bold transition after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-white after:transition-all ${pathname === href ? "text-white after:w-full" : "text-white/80 after:w-0 hover:text-white hover:after:w-full"}`}>{label}</Link>
+              <Link key={href} href={href} className={`relative py-2 text-xs font-bold transition after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-white after:transition-all ${pathname === href ? "text-white after:w-full" : "text-white/80 after:w-0 hover:text-white hover:after:w-full"}`}>{label}</Link>
             ))}
           </nav>
-          <form onSubmit={submitSearch} className="relative ml-auto hidden min-w-[260px] flex-1 xl:block">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a9a9a]" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search")} className="h-11 w-full rounded-md border border-white/25 bg-white pl-11 pr-12 text-sm text-[#1b1b1b] shadow-sm outline-none transition placeholder:text-[#777] focus:border-white focus:ring-2 focus:ring-white/25" />
-            <button className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded bg-[#16865c] text-white" title="Search products"><Search className="h-4 w-4" /></button>
+          <form onSubmit={submitSearch} className="relative ml-auto hidden min-w-[380px] flex-1 xl:block">
+            <Search className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#777]" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search")} className="h-11 w-full rounded-lg border border-white/25 bg-white pl-12 pr-14 text-[15px] font-medium text-[#171719] shadow-sm outline-none transition placeholder:font-normal placeholder:text-[#707070] focus:border-white focus:ring-2 focus:ring-white/35" />
+            <button className="absolute right-1 top-1 grid h-9 w-10 place-items-center rounded-md bg-[#16865c] text-white transition hover:bg-[#10734e]" title="Search products"><Search className="h-4 w-4" /></button>
           </form>
-          <label className="relative hidden h-10 min-w-[76px] cursor-pointer items-center justify-center gap-1 rounded-md border border-white/35 bg-white/10 px-2 text-xs font-black text-white transition hover:bg-white/15 xl:flex" title="Change currency">
+          <label className="relative hidden h-9 min-w-[62px] cursor-pointer items-center justify-center gap-0.5 rounded-md border border-white/30 bg-white/10 px-1.5 text-[10px] font-black text-white transition hover:bg-white/15 xl:flex" title="Change currency">
             {currency}<ChevronDown className="h-3.5 w-3.5" />
             <select
               value={currency}
@@ -56,14 +56,14 @@ export function Header() {
               {Object.keys(currencyOptions).map((code) => <option className="bg-white text-black" key={code} value={code}>{code === "RWF" ? "RWF - Rwandan Franc" : code}</option>)}
             </select>
           </label>
-          <label className="relative hidden h-10 min-w-[58px] cursor-pointer items-center justify-center gap-1 rounded-md border border-white/35 bg-white/10 px-2 text-xs font-black text-white transition hover:bg-white/15 xl:flex" title={t("language")}>
-            <Languages className="h-4 w-4" /><span className="uppercase">{language}</span><ChevronDown className="h-3 w-3" />
+          <label className="relative hidden h-9 min-w-[50px] cursor-pointer items-center justify-center gap-1 rounded-md border border-white/30 bg-white/10 px-1.5 text-[10px] font-black text-white transition hover:bg-white/15 xl:flex" title={t("language")}>
+            <Languages className="h-3.5 w-3.5" /><span className="uppercase">{language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="absolute inset-0 cursor-pointer opacity-0" aria-label={t("language")}>
               {languages.map(([code, label]) => <option className="bg-white text-black" key={code} value={code}>{label}</option>)}
             </select>
           </label>
-          <label className="relative hidden h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/35 bg-white/10 text-white transition hover:bg-white/15 xl:flex" title={`Shopping branch: ${branches.find((branch) => branch.id === selectedBranchId)?.name || "Choose branch"}`}>
-            <MapPin className="h-4 w-4" />
+          <label className="relative hidden h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/30 bg-white/10 text-white transition hover:bg-white/15 xl:flex" title={`Shopping branch: ${branches.find((branch) => branch.id === selectedBranchId)?.name || "Choose branch"}`}>
+            <MapPin className="h-3.5 w-3.5" />
             <select
               value={selectedBranchId}
               onChange={(event) => setSelectedBranchId(event.target.value)}
@@ -75,14 +75,13 @@ export function Header() {
           </label>
           <a
             href={callCenterHref}
-            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/35 bg-white/10 text-white transition hover:bg-white/15 xl:ml-0 xl:h-10 xl:w-auto xl:gap-2 xl:px-3"
+            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/30 bg-white/10 text-white transition hover:bg-white/15 xl:ml-0"
             title={`Call ${selectedBranch.name}: ${selectedBranch.phone}`}
             aria-label={`Call center ${selectedBranch.phone}`}
           >
-            <PhoneCall className="h-4 w-4" />
-            <span className="hidden text-xs font-black xl:inline">Call center</span>
+            <PhoneCall className="h-3.5 w-3.5" />
           </a>
-          <button onClick={toggleTheme} className="icon-button hidden !text-white hover:!border-white/30 hover:!bg-white/10 xl:grid" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}>
+          <button onClick={toggleTheme} className="hidden !h-9 !w-9 place-items-center rounded-md border border-white/30 bg-white/10 !text-white transition hover:!bg-white/15 [&_svg]:h-4 [&_svg]:w-4 xl:grid" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}>
             {theme === "light" ? <Moon /> : <Sun />}
           </button>
           {user ? (
@@ -91,7 +90,7 @@ export function Header() {
                 signOut();
                 router.push("/");
               }}
-              className="hidden h-11 items-center rounded-md border border-white/30 bg-white/10 px-4 text-xs font-black text-white transition hover:bg-white/15 xl:flex"
+              className="hidden h-9 items-center rounded-md border border-white/30 bg-white/10 px-2.5 text-[10px] font-black text-white transition hover:bg-white/15 xl:flex"
               title={`Sign out ${user.email}`}
             >
               {t("signout")}
@@ -99,14 +98,14 @@ export function Header() {
           ) : (
             <Link
               href="/signin"
-              className="hidden h-11 items-center rounded-md border border-white/70 bg-white px-4 text-xs font-black text-brand shadow-sm transition hover:-translate-y-0.5 hover:shadow-md xl:flex"
+              className="hidden h-9 items-center rounded-md border border-white/70 bg-white px-2.5 text-[10px] font-black text-brand shadow-sm transition hover:-translate-y-0.5 hover:shadow-md xl:flex"
             >
               {t("signin")}
             </Link>
           )}
           <Link
             href="/cart"
-            className="relative grid h-9 w-9 shrink-0 place-items-center overflow-visible rounded-md border border-white/70 bg-white p-1 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:h-11 sm:w-11"
+            className="relative grid h-9 w-9 shrink-0 place-items-center overflow-visible rounded-md border border-white/70 bg-white p-1 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             title="Shopping cart"
           >
             <img

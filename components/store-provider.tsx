@@ -152,7 +152,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     savedProductIds,
     managedProducts,
     addToCart,
-    updateQuantity: (id, quantity) => setCart((items) => items.map((item) => item.product.id === id ? { ...item, quantity: Math.max(1, quantity) } : item)),
+    updateQuantity: (id, quantity) => setCart((items) =>
+      quantity <= 0
+        ? items.filter((item) => item.product.id !== id)
+        : items.map((item) => item.product.id === id ? { ...item, quantity } : item)
+    ),
     removeFromCart: (id) => setCart((items) => items.filter((item) => item.product.id !== id)),
     clearCart: () => {
       setCart([]);
