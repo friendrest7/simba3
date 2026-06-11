@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { BarChart3, Boxes, Building2, CheckCircle2, Download, ShoppingCart, TrendingUp, Truck, Users } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
@@ -18,12 +18,12 @@ export default function AdminDashboard() {
   const nationalSales = totalOrders * 23_750;
   const activeDrivers = drivers.filter((driver) => driver.status !== "offline").length;
   const averageOrder = 23_750;
-  const branchRows = useMemo(() => visibleBranches.map((branch, index) => {
+  const branchRows = visibleBranches.map((branch, index) => {
     const orders = Math.round(branch.orders * multiplier);
     const sales = orders * averageOrder;
     const score = 91 + ((branch.orders + index) % 7);
     return { branch, orders, sales, score, drivers: drivers.filter((driver) => driver.branchId === branch.id).length };
-  }), [visibleBranches, multiplier]);
+  });
   const bestBranch = [...branchRows].sort((a, b) => b.sales - a.sales)[0];
 
   function exportReport() {

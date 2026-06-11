@@ -1,4 +1,18 @@
 import Image from "next/image";
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
-export default function SignUpPage() { return <div className="grid min-h-[800px] lg:grid-cols-2"><div className="relative hidden lg:block"><Image src="/images/8.jpg" alt="Independent market seller" fill className="object-cover" sizes="50vw" /><div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" /><div className="absolute bottom-12 left-12 max-w-md text-white"><p className="text-3xl font-black">Open your market<br />to the world.</p><p className="mt-3 text-sm leading-6 text-white/70">Buy what you love or turn local products into global opportunity.</p></div></div><div className="flex items-center justify-center px-5 py-16"><Suspense fallback={<div className="text-sm text-muted">Loading account form...</div>}><AuthForm mode="signup" /></Suspense></div></div>; }
+
+export default function SignUpPage() {
+  return (
+    <div className="grid min-h-[760px] lg:grid-cols-2">
+      <div className="relative hidden lg:block">
+        <Image src="/images/8.jpg" alt="Fresh Simba marketplace products" fill className="object-cover" sizes="50vw" />
+        <div className="absolute inset-0 bg-black/15" />
+      </div>
+      <div className="flex items-center justify-center px-5 py-16">
+        <Suspense fallback={<div className="text-sm text-muted">Loading...</div>}><AuthForm mode="signup" /></Suspense>
+      </div>
+    </div>
+  );
+}
+

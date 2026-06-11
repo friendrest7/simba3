@@ -7,6 +7,10 @@ const STOP_WORDS = new Set([
   "searched", "show", "simba", "some", "the", "to", "want", "what", "which", "with",
 ]);
 
+const UI_PREFIX = /^(?:search(?:\s+for)?|find|show(?:\s+me)?|look(?:ing)?\s+for|try)\s*[:\-]?\s*/i;
+const UI_SUFFIX = /\s*(?:search|results?|products?)\s*$/i;
+const UI_WORDS = new Set(["find", "search", "searched", "show", "try"]);
+
 const TERM_EXPANSIONS: Record<string, string[]> = {
   affordable: ["cheap", "budget"],
   beverage: ["water", "milk"],
@@ -50,10 +54,32 @@ function getBudget(query: string) {
   return { min: null, max: maximum ? parseAmount(maximum[1]) : null };
 }
 
+export function cleanSearchQuery(query: string) {
+  const originalMentionsSimbaProduct = /\bsimba\s+(?:chips?|crisps?|snacks?|chutney|smoked|salt|vinegar|favourites?|multipacks?)\b/i.test(query);
+  const cleaned = query
+    .replace(/[“”"'`]+/g, " ")
+    .replace(UI_PREFIX, "")
+    .replace(UI_SUFFIX, "")
+    .replace(/\btry\s*:\s*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const uniqueWords = words.filter((word, index) => {
+    const normalizedWord = normalize(word);
+    if (!normalizedWord) return false;
+    if (UI_WORDS.has(normalizedWord)) return false;
+    if (normalizedWord === "simba" && !originalMentionsSimbaProduct) return false;
+    return words.findIndex((candidate) => normalize(candidate) === normalizedWord) === index;
+  });
+  return uniqueWords.join(" ").trim();
+}
+
 function queryTerms(query: string) {
-  const baseTerms = normalize(query)
+  const cleaned = cleanSearchQuery(query);
+  const keepSimba = /\bsimba\b/.test(normalize(cleaned));
+  const baseTerms = normalize(cleaned)
     .split(/\s+/)
-    .filter((term) => term.length > 1 && !STOP_WORDS.has(term) && !/^\d+$/.test(term));
+    .filter((term) => term.length > 1 && (!STOP_WORDS.has(term) || (term === "simba" && keepSimba)) && !/^\d+$/.test(term));
   const expandedTerms = baseTerms.flatMap((term) => TERM_EXPANSIONS[term] || []);
   return Array.from(new Set([...baseTerms, ...expandedTerms]));
 }
@@ -63,10 +89,11 @@ export function productPriceRwf(product: Product) {
 }
 
 export function searchProducts(items: Product[], query: string, limit?: number) {
-  const terms = queryTerms(query);
-  const budget = getBudget(query);
-  const wantsBudget = /\b(affordable|budget|cheap|cheapest|low price)\b/i.test(query) || budget.max !== null;
-  const wantsAvailable = /\b(available|in stock|ready)\b/i.test(query);
+  const cleanedQuery = cleanSearchQuery(query);
+  const terms = queryTerms(cleanedQuery);
+  const budget = getBudget(cleanedQuery);
+  const wantsBudget = /\b(affordable|budget|cheap|cheapest|low price)\b/i.test(cleanedQuery) || budget.max !== null;
+  const wantsAvailable = /\b(available|in stock|ready)\b/i.test(cleanedQuery);
 
   const ranked = items.flatMap((product) => {
     const priceRwf = productPriceRwf(product);

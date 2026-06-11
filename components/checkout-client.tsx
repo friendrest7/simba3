@@ -15,17 +15,22 @@ import {
   Store,
   Truck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { branches, formatPrice } from "@/lib/data";
 import { useStore } from "./store-provider";
+import { createClient } from "@/lib/supabase/client";
 
 type PaymentMethod = "card" | "mobile" | "cash";
 type FulfilmentMethod = "delivery" | "pickup";
 
 export function CheckoutClient() {
-  const { user, cart, clearCart, currency, selectedBranchId, setSelectedBranchId } = useStore();
+  const { user, authLoading, cart, clearCart, currency, selectedBranchId, setSelectedBranchId, t } = useStore();
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [placed, setPlaced] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [orderError, setOrderError] = useState("");
+  const [placingOrder, setPlacingOrder] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [fulfilment, setFulfilment] = useState<FulfilmentMethod>("delivery");
   const [mobilePromptSent, setMobilePromptSent] = useState(false);
@@ -35,25 +40,74 @@ export function CheckoutClient() {
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
-    if (!user) router.replace("/signin?next=/checkout");
-  }, [user, router]);
+    if (!authLoading && !user) router.replace("/signin?next=/checkout");
+  }, [user, authLoading, router]);
 
   function choosePayment(method: PaymentMethod) {
     setPaymentMethod(method);
     setMobilePromptSent(false);
   }
 
-  function placeOrder(event: React.FormEvent) {
+  async function placeOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOrderError("");
     if (paymentMethod === "mobile" && !mobilePromptSent) {
       setMobilePromptSent(true);
       return;
     }
-    setPlaced(true);
-    clearCart();
+    if (!user || !cart.length) return;
+
+    const formData = new FormData(event.currentTarget);
+    setPlacingOrder(true);
+    try {
+      const subtotalRwf = Math.round(subtotal * 1450);
+      const deliveryFeeRwf = Math.round(deliveryFee * 1450);
+      const { data: order, error: orderInsertError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          branch_id: selectedBranchId,
+          status: "confirmed",
+          subtotal_rwf: subtotalRwf,
+          delivery_fee_rwf: deliveryFeeRwf,
+          total_rwf: subtotalRwf + deliveryFeeRwf,
+          payment_method: paymentMethod,
+          delivery_address: fulfilment === "pickup" ? {
+            fulfilment,
+            branch: selectedBranch.name,
+            address: selectedBranch.address,
+          } : {
+            fulfilment,
+            address: formData.get("address"),
+            city: formData.get("city"),
+            landmark: formData.get("landmark"),
+            instructions: formData.get("instructions"),
+            phone: formData.get("phone"),
+          },
+        })
+        .select("id, order_number")
+        .single();
+      if (orderInsertError) throw orderInsertError;
+
+      const { error: itemsError } = await supabase.from("order_items").insert(cart.map(({ product, quantity }) => ({
+        order_id: order.id,
+        product_name: product.name,
+        unit_price_rwf: Math.round(product.price * 1450),
+        quantity,
+      })));
+      if (itemsError) throw itemsError;
+
+      setOrderNumber(order.order_number);
+      setPlaced(true);
+      clearCart();
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : "Your order could not be saved. Please try again.");
+    } finally {
+      setPlacingOrder(false);
+    }
   }
 
-  if (!user) return <div className="min-h-[70vh] py-24 text-center text-sm text-muted">Redirecting to secure sign in...</div>;
+  if (authLoading || !user) return <div className="min-h-[70vh] py-24 text-center text-sm text-muted">{t("protectedRoute")}</div>;
 
   if (placed) {
     const cashMessage = paymentMethod === "cash"
@@ -62,10 +116,10 @@ export function CheckoutClient() {
     return (
       <div className="mx-auto min-h-[70vh] max-w-xl px-5 py-24 text-center">
         <CheckCircle2 className="mx-auto h-16 w-16 text-[#16865c]" />
-        <span className="eyebrow mt-7 inline-block">Order confirmed</span>
+        <span className="eyebrow mt-7 inline-block">{t("orderConfirmed")}</span>
         <h1 className="mt-3 text-4xl font-black">Thank you, {user.name}.</h1>
         <p className="mt-4 leading-7 text-muted">
-          Order #SMB-48220 is confirmed for {fulfilment === "pickup" ? `collection at ${selectedBranch.name}` : "delivery to your location"}. {cashMessage}
+          Order #{orderNumber} is confirmed for {fulfilment === "pickup" ? `collection at ${selectedBranch.name}` : "delivery to your location"}. {cashMessage}
         </p>
         <button type="button" onClick={() => router.push("/dashboard/client")} className="button-primary mt-7">View your order</button>
       </div>
@@ -75,7 +129,7 @@ export function CheckoutClient() {
   return (
     <div className="mx-auto max-w-[1200px] px-5 py-12 sm:px-8">
       <span className="eyebrow">Simple and secure checkout</span>
-      <h1 className="mt-3 text-4xl font-black">Complete your order</h1>
+      <h1 className="mt-3 text-4xl font-black">{t("completeOrder")}</h1>
       <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-muted">
         <span className="flex items-center gap-2 rounded-md bg-[#16865c]/10 px-3 py-2 text-[#16865c]"><ShieldCheck className="h-4 w-4" /> Signed in as {user.email}</span>
         <span className="flex items-center gap-2 rounded-md bg-[#3867d6]/10 px-3 py-2 text-[#3867d6]"><LockKeyhole className="h-4 w-4" /> Your details are protected</span>
@@ -163,9 +217,12 @@ export function CheckoutClient() {
             )}
           </section>
 
-          <button disabled={!cart.length} className={`button-primary w-full disabled:opacity-40 ${paymentMethod === "mobile" ? "!bg-[#16865c]" : paymentMethod === "cash" ? "!bg-[#d97706]" : "!bg-[#3867d6]"}`}>
+          {orderError && <p role="alert" className="rounded-md border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{orderError}</p>}
+          <button disabled={!cart.length || placingOrder} className={`button-primary w-full disabled:opacity-40 ${paymentMethod === "mobile" ? "!bg-[#16865c]" : paymentMethod === "cash" ? "!bg-[#d97706]" : "!bg-[#3867d6]"}`}>
             {paymentMethod === "cash" ? <Banknote className="h-4 w-4" /> : <LockKeyhole className="h-4 w-4" />}
-            {paymentMethod === "mobile" && !mobilePromptSent
+            {placingOrder
+              ? "Saving your order..."
+              : paymentMethod === "mobile" && !mobilePromptSent
               ? `Send payment request for ${formatPrice(total, currency)}`
               : paymentMethod === "cash"
                 ? `Place cash order - ${formatPrice(total, currency)}`

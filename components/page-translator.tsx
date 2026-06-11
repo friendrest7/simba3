@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { translateVisibleText } from "@/lib/i18n";
 import { useStore } from "./store-provider";
 
 const originalText = new WeakMap<Text, string>();
@@ -61,52 +62,13 @@ function collectPageText() {
 
 export function PageTranslator() {
   const { language } = useStore();
-  const languageRef = useRef(language);
 
   useEffect(() => {
-    languageRef.current = language;
     let timer = 0;
-    let cancelled = false;
 
-    async function translatePage() {
-      const activeLanguage = languageRef.current;
+    function translatePage() {
       const entries = collectPageText();
-      if (activeLanguage === "en") {
-        entries.forEach((entry) => entry.apply(entry.value));
-        return;
-      }
-
-      const storageKey = `simba-page-translations-${activeLanguage}`;
-      let cache: Record<string, string> = {};
-      try {
-        cache = JSON.parse(localStorage.getItem(storageKey) || "{}");
-      } catch {
-        localStorage.removeItem(storageKey);
-      }
-
-      const unique = [...new Set(entries.map((entry) => entry.value))];
-      const missing = unique.filter((text) => !cache[text]);
-      for (let index = 0; index < missing.length; index += 60) {
-        const batch = missing.slice(index, index + 60);
-        try {
-          const response = await fetch("/api/translate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ language: activeLanguage, texts: batch }),
-          });
-          const data = await response.json();
-          if (Array.isArray(data.translations)) {
-            batch.forEach((text, itemIndex) => {
-              cache[text] = typeof data.translations[itemIndex] === "string" ? data.translations[itemIndex] : text;
-            });
-          }
-        } catch {
-          batch.forEach((text) => { cache[text] = text; });
-        }
-      }
-      if (cancelled || activeLanguage !== languageRef.current) return;
-      localStorage.setItem(storageKey, JSON.stringify(cache));
-      entries.forEach((entry) => entry.apply(cache[entry.value] || entry.value));
+      entries.forEach((entry) => entry.apply(translateVisibleText(entry.value, language)));
     }
 
     const schedule = () => {
@@ -118,7 +80,6 @@ export function PageTranslator() {
     schedule();
 
     return () => {
-      cancelled = true;
       window.clearTimeout(timer);
       observer.disconnect();
     };

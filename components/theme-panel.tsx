@@ -15,15 +15,15 @@ const colors: Array<{ name: Accent; label: string; hex: string }> = [
 
 export function ThemePanel() {
   const [open, setOpen] = useState(false);
-  const { accent, setAccent } = useStore();
+  const { accent, setAccent, t } = useStore();
 
   return (
     <div className="fixed bottom-5 right-5 z-[85]">
       {open && (
         <div className="mb-3 w-56 rounded-xl border border-line bg-canvas p-4 shadow-2xl">
           <div className="flex items-center justify-between">
-            <div><p className="text-xs font-black">Choose interface color</p><p className="mt-1 text-[10px] text-muted">Updates the navbar and buttons</p></div>
-            <button onClick={() => setOpen(false)} className="icon-button !h-8 !w-8" title="Close colors"><X className="h-4 w-4" /></button>
+            <div><p className="text-xs font-black">{t("chooseColor")}</p><p className="mt-1 text-[10px] text-muted">{t("colorHelp")}</p></div>
+            <button onClick={() => setOpen(false)} className="icon-button !h-8 !w-8" title={t("closeColors")}><X className="h-4 w-4" /></button>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3">
             {colors.map((color) => (
@@ -41,7 +41,7 @@ export function ThemePanel() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(!open)} className="grid h-12 w-12 place-items-center rounded-full bg-brand text-white shadow-2xl transition hover:scale-105" title="Change interface color"><Palette className="h-5 w-5" /></button>
+      <button onClick={() => setOpen(!open)} className="grid h-12 w-12 place-items-center rounded-full bg-brand text-white shadow-2xl transition hover:scale-105" title={t("changeColor")}><Palette className="h-5 w-5" /></button>
     </div>
   );
 }

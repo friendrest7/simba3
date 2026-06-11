@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Logo({ inverse = false }: { inverse?: boolean }) {
@@ -11,8 +12,8 @@ export function Logo({ inverse = false }: { inverse?: boolean }) {
       }`}
       aria-label="Simba Supermarket home"
     >
-      <img
-        src="/images/logo.png?v=2"
+      <Image
+        src="/images/logo.png"
         alt="Simba Supermarket"
         width={58}
         height={74}
@@ -21,3 +22,4 @@ export function Logo({ inverse = false }: { inverse?: boolean }) {
     </Link>
   );
 }
+

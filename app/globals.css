@@ -63,6 +63,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .form-input { @apply h-12 w-full rounded-md border border-line bg-white px-4 text-sm text-ink outline-none transition placeholder:text-muted/70 focus:border-brand dark:bg-white/5; }
   .input-icon { @apply absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted; }
   .dashboard-card { @apply border border-line bg-canvas p-5; border-radius: 6px; }
+  .header-action {
+    @apply relative hidden min-w-14 flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px] font-bold text-ink transition hover:bg-black/5 dark:hover:bg-white/5 sm:flex;
+  }
+  .header-action svg { @apply h-5 w-5; }
+  .action-count {
+    @apply absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] text-white;
+  }
 }
 
 @media (hover: hover) {
@@ -77,12 +84,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @keyframes ticker { to { transform: translateX(-50%); } }
 .ticker-track { animation: ticker 24s linear infinite; }
-
-.landing-backdrop {
-  background:
-    linear-gradient(rgb(var(--canvas) / .76), rgb(var(--canvas) / .76)),
-    url("/images/hero_image.png") center / cover fixed;
-}
 
 @keyframes landing-ticker {
   to { transform: translateX(-50%); }
@@ -110,11 +111,5 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .landing-ticker-track,
   .vertical-ticker-track {
     animation: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .landing-backdrop {
-    background-attachment: scroll;
   }
 }

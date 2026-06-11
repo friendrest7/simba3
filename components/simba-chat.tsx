@@ -66,7 +66,9 @@ export function SimbaChat() {
     }
   }
 
-  sendMessageRef.current = sendMessage;
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
 
   useEffect(() => {
     function handleSearch(event: Event) {
