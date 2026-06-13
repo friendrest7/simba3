@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
-import { useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { categories, products } from "@/lib/data";
 import { cleanSearchQuery } from "@/lib/product-search";
@@ -11,7 +10,6 @@ import { useStore } from "@/components/store-provider";
 
 export default function Home() {
   const { t } = useStore();
-  const [videoFailed, setVideoFailed] = useState(false);
   const videoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL;
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>) {
@@ -28,15 +26,7 @@ export default function Home() {
   return (
     <div>
       <section className="relative min-h-[620px] overflow-hidden bg-[#151515] text-white">
-        <Image
-          src="/images/hero_image.png"
-          alt="Simba Supermarket"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        {videoUrl && !videoFailed && (
+        {videoUrl && (
           <video
             className="absolute inset-0 h-full w-full object-cover"
             autoPlay
@@ -44,8 +34,6 @@ export default function Home() {
             loop
             playsInline
             preload="metadata"
-            poster="/images/hero_image.png"
-            onError={() => setVideoFailed(true)}
             aria-hidden="true"
           >
             <source src={videoUrl} type="video/mp4" />
