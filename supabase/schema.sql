@@ -102,7 +102,7 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     new.email,
-    new.phone,
+    nullif(new.raw_user_meta_data ->> 'phone', ''),
     'customer'
   );
   return new;

@@ -57,7 +57,7 @@ export default function Home() {
             <span className="inline-flex rounded-full border border-white/25 bg-black/20 px-4 py-2 text-[11px] font-black uppercase tracking-[.18em]">
               {t("heroEyebrow")}
             </span>
-            <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[.98] tracking-[-.04em] sm:text-7xl">
+            <h1 className="mt-6 max-w-3xl whitespace-pre-line text-5xl font-black leading-[.98] tracking-[-.04em] sm:text-7xl">
               {t("heroTitle")}
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-white/80 sm:text-lg">{t("heroText")}</p>
@@ -69,6 +69,18 @@ export default function Home() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/shop" className="button-primary">{t("startShopping")} <ArrowRight className="h-4 w-4" /></Link>
               <Link href="/shop?category=Simba%20Favourites" className="button-secondary !border-white/40 !bg-white/10 !text-white">{t("seeFavourites")}</Link>
+            </div>
+            <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3 border-t border-white/20 pt-6">
+              {[
+                ["16+", t("productsReady")],
+                ["30-45", t("deliveryMinutes")],
+                ["8", t("marketBranches")],
+              ].map(([value, label]) => (
+                <div key={String(label)}>
+                  <p className="text-2xl font-black sm:text-3xl">{value}</p>
+                  <p className="mt-1 text-[11px] font-bold uppercase tracking-[.12em] text-white/65 sm:text-xs">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -139,4 +151,3 @@ export default function Home() {
     </div>
   );
 }
-

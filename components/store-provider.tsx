@@ -117,7 +117,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
       if (!active) return;
 
-      const role = roleForUi(profile?.role || authUser.user_metadata?.role);
+      const role = roleForUi(profile?.role);
       const email = authUser.email || "";
       const metadataName = typeof authUser.user_metadata?.full_name === "string" ? authUser.user_metadata.full_name : "";
       setUser({

@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const requestedNext = url.searchParams.get("next");
+  const providerError = url.searchParams.get("error_description");
   const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
     ? requestedNext
     : "/dashboard/client";
@@ -16,7 +17,9 @@ export async function GET(request: Request) {
   }
 
   const signInUrl = new URL("/signin", url.origin);
-  signInUrl.searchParams.set("error", "The confirmation link is invalid or expired.");
+  signInUrl.searchParams.set(
+    "error",
+    providerError || "The confirmation or sign-in link is invalid or expired.",
+  );
   return NextResponse.redirect(signInUrl);
 }
-

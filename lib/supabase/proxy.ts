@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
         .select("role")
         .eq("id", user.id)
         .maybeSingle();
-      const role = profile?.role || user.user_metadata?.role || "customer";
+      const role = profile?.role || "customer";
       if (!rule.roles.includes(role)) {
         return NextResponse.redirect(new URL(role === "customer" ? "/dashboard/client" : `/dashboard/${role}`, request.url));
       }
@@ -54,4 +54,3 @@ export async function updateSession(request: NextRequest) {
 
   return response;
 }
-

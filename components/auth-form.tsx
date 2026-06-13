@@ -19,7 +19,6 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { useStore } from "./store-provider";
 
-type AuthMethod = "email" | "phone";
 type StaffRole = "manager" | "admin" | "driver" | "ceo";
 
 const staffRoles: Array<{ value: StaffRole; label: string }> = [
@@ -33,8 +32,9 @@ function safeDestination(value: string | null) {
   return value?.startsWith("/") && !value.startsWith("//") ? value : null;
 }
 
-function normalizePhone(value: string) {
+function normalizeOptionalPhone(value: string) {
   const compact = value.replace(/[^\d+]/g, "");
+  if (!compact) return "";
   if (compact.startsWith("+")) return compact;
   if (compact.startsWith("0")) return `+250${compact.slice(1)}`;
   if (compact.startsWith("250")) return `+${compact}`;
@@ -46,10 +46,19 @@ function messageForError(message: string) {
   if (/email not confirmed/i.test(message)) return "Confirm your email before signing in.";
   if (/user already registered/i.test(message)) return "An account already exists for this email.";
   if (/password should be/i.test(message)) return "Use a password with at least 8 characters.";
-  if (/token has expired|invalid.*token/i.test(message)) return "The verification code is invalid or expired.";
-  if (/phone provider|sms provider|unsupported phone/i.test(message)) return "Phone authentication is not enabled in Supabase yet.";
   if (/rate limit/i.test(message)) return "Too many attempts. Wait a moment and try again.";
   return message || "Authentication could not be completed.";
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.6h3.3c1.9-1.8 2.9-4.4 2.9-7.5Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1a5.9 5.9 0 0 1-5.5-4.1H3.1v2.7A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.5 14a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9.2L6.5 14Z" />
+      <path fill="#EA4335" d="M12 6.1c1.5 0 2.9.5 3.9 1.5l2.9-2.9A9.7 9.7 0 0 0 3.1 7.5l3.4 2.7A5.9 5.9 0 0 1 12 6.1Z" />
+    </svg>
+  );
 }
 
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
@@ -59,12 +68,9 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const destination = safeDestination(params.get("next"));
   const supabase = useMemo(() => createClient(), []);
   const isSignUp = mode === "signup";
-  const [method, setMethod] = useState<AuthMethod>("email");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -85,7 +91,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
   async function finishAuthentication(user: SupabaseUser) {
     const { profile, error } = await profileFor(user);
-    const role = profile?.role || user.user_metadata?.role || "customer";
+    const role = profile?.role || "customer";
 
     if (staffMode) {
       if (error) {
@@ -108,73 +114,48 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     router.refresh();
   }
 
-  async function submitEmail() {
-    if (isSignUp) {
-      if (password !== confirmPassword) throw new Error("The passwords do not match.");
-      if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
-        options: {
-          data: { full_name: fullName.trim() },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destination || "/dashboard/client")}`,
-        },
-      });
-      if (error) throw error;
-      if (!data.session) {
-        setNotice(t("checkEmail"));
-        return;
-      }
-      if (data.user) await finishAuthentication(data.user);
-      return;
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
-    if (error) throw error;
-    if (!data.user) throw new Error("Supabase did not return a signed-in user.");
-    await finishAuthentication(data.user);
-  }
-
-  async function submitPhone() {
-    const normalizedPhone = normalizePhone(phone);
-    if (!/^\+[1-9]\d{7,14}$/.test(normalizedPhone)) throw new Error("Enter a valid phone number with country code.");
-
-    if (!otpSent) {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: normalizedPhone,
-        options: {
-          shouldCreateUser: isSignUp,
-          data: isSignUp ? { full_name: fullName.trim() } : undefined,
-        },
-      });
-      if (error) throw error;
-      setOtpSent(true);
-      setNotice(t("codeSent"));
-      return;
-    }
-
-    if (otp.length !== 6) throw new Error("Enter the 6-digit verification code.");
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: normalizedPhone,
-      token: otp,
-      type: "sms",
-    });
-    if (error) throw error;
-    if (!data.user) throw new Error("Supabase did not return a verified user.");
-    await finishAuthentication(data.user);
-  }
-
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setAuthError("");
     setNotice("");
     setLoading(true);
+
     try {
-      if (method === "phone") await submitPhone();
-      else await submitEmail();
+      if (isSignUp) {
+        if (password !== confirmPassword) throw new Error("The passwords do not match.");
+        if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
+
+        const normalizedPhone = normalizeOptionalPhone(phone);
+        if (normalizedPhone && !/^\+[1-9]\d{7,14}$/.test(normalizedPhone)) {
+          throw new Error("Enter a valid phone number with country code or leave it blank.");
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
+          password,
+          options: {
+            data: {
+              full_name: fullName.trim(),
+              phone: normalizedPhone || null,
+            },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destination || "/dashboard/client")}`,
+          },
+        });
+        if (error) throw error;
+        if (!data.session) {
+          setNotice(t("checkEmail"));
+          return;
+        }
+        if (data.user) await finishAuthentication(data.user);
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+        if (error) throw error;
+        if (!data.user) throw new Error("Supabase did not return a signed-in user.");
+        await finishAuthentication(data.user);
+      }
     } catch (error) {
       setAuthError(messageForError(error instanceof Error ? error.message : ""));
     } finally {
@@ -182,13 +163,31 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     }
   }
 
-  function changeMethod(nextMethod: AuthMethod) {
-    setMethod(nextMethod);
+  async function signInWithGoogle() {
     setAuthError("");
     setNotice("");
-    setOtp("");
-    setOtpSent(false);
-    if (nextMethod === "phone") setStaffMode(false);
+    setLoading(true);
+
+    try {
+      const next = destination || "/dashboard/client";
+      const redirectTo = new URL("/auth/callback", window.location.origin);
+      redirectTo.searchParams.set("next", next);
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectTo.toString(),
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
+        },
+      });
+      if (error) throw error;
+    } catch (error) {
+      setAuthError(messageForError(error instanceof Error ? error.message : ""));
+      setLoading(false);
+    }
   }
 
   return (
@@ -199,17 +198,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       </h1>
       <p className="mt-3 text-sm leading-6 text-muted">{staffMode ? t("staffAuthText") : t("authText")}</p>
 
-      <div className="mt-7 grid grid-cols-2 gap-1 rounded-lg bg-black/[.045] p-1 dark:bg-white/[.06]">
-        <button type="button" onClick={() => changeMethod("email")} className={`flex h-11 items-center justify-center gap-2 rounded-md text-xs font-black ${method === "email" ? "bg-canvas text-brand shadow-sm" : "text-muted"}`}>
-          <Mail className="h-4 w-4" /> {t("email")}
-        </button>
-        <button type="button" onClick={() => changeMethod("phone")} className={`flex h-11 items-center justify-center gap-2 rounded-md text-xs font-black ${method === "phone" ? "bg-canvas text-brand shadow-sm" : "text-muted"}`}>
-          <Phone className="h-4 w-4" /> {t("phone")}
-        </button>
-      </div>
-
       {isSignUp && (
-        <div className="mt-5">
+        <div className="mt-7">
           <label className="form-label">{t("fullName")}</label>
           <div className="relative">
             <UserRound className="input-icon" />
@@ -218,72 +208,75 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         </div>
       )}
 
-      {method === "email" ? (
-        <>
-          <div className="mt-5">
-            <label className="form-label">{t("email")}</label>
-            <div className="relative">
-              <Mail className="input-icon" />
-              <input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="form-input pl-11" placeholder="you@example.com" />
-            </div>
+      <div className={isSignUp ? "mt-4" : "mt-7"}>
+        <label className="form-label">{t("email")}</label>
+        <div className="relative">
+          <Mail className="input-icon" />
+          <input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="form-input pl-11" placeholder="you@example.com" />
+        </div>
+      </div>
+
+      {isSignUp && (
+        <div className="mt-4">
+          <label className="form-label">{t("phone")} <span className="font-normal text-muted">({t("optional")})</span></label>
+          <div className="relative">
+            <Phone className="input-icon" />
+            <input type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="+250 78 123 4567" />
           </div>
-          <div className="mt-4">
-            <label className="form-label">{t("password")}</label>
-            <div className="relative">
-              <LockKeyhole className="input-icon" />
-              <input required type={showPassword ? "text" : "password"} minLength={8} autoComplete={isSignUp ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} className="form-input px-11" />
-              <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-muted" aria-label={showPassword ? "Hide password" : "Show password"}>
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+          <p className="mt-2 text-[11px] text-muted">{t("phoneProfileHelp")}</p>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <label className="form-label">{t("password")}</label>
+        <div className="relative">
+          <LockKeyhole className="input-icon" />
+          <input required type={showPassword ? "text" : "password"} minLength={8} autoComplete={isSignUp ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} className="form-input px-11" />
+          <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-muted" aria-label={showPassword ? "Hide password" : "Show password"}>
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {isSignUp && (
+        <div className="mt-4">
+          <label className="form-label">{t("confirmPassword")}</label>
+          <div className="relative">
+            <LockKeyhole className="input-icon" />
+            <input required type={showPassword ? "text" : "password"} minLength={8} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="form-input pl-11" />
           </div>
-          {isSignUp && (
-            <div className="mt-4">
-              <label className="form-label">{t("confirmPassword")}</label>
-              <div className="relative">
-                <LockKeyhole className="input-icon" />
-                <input required type={showPassword ? "text" : "password"} minLength={8} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="form-input pl-11" />
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="mt-5">
-            <label className="form-label">{t("phone")}</label>
-            <div className="relative">
-              <Phone className="input-icon" />
-              <input required type="tel" autoComplete="tel" disabled={otpSent} value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11 disabled:opacity-65" placeholder="+250 78 123 4567" />
-            </div>
-          </div>
-          {otpSent && (
-            <div className="mt-4">
-              <label className="form-label">{t("verificationCode")}</label>
-              <input required inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} className="form-input text-center text-lg font-black tracking-[.35em]" placeholder="123456" />
-              <button type="button" onClick={() => { setOtpSent(false); setOtp(""); setNotice(""); }} className="mt-2 text-xs font-bold text-brand">{t("changePhone")}</button>
-            </div>
-          )}
-        </>
+        </div>
       )}
 
       {authError && <p role="alert" className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{authError}</p>}
       {notice && <p className="mt-4 flex items-center gap-2 rounded-md border border-green-300 bg-green-50 p-3 text-xs font-bold text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-200"><CheckCircle2 className="h-4 w-4" /> {notice}</p>}
 
-      <button disabled={loading || (Boolean(notice) && method === "email")} className="button-primary mt-6 w-full disabled:opacity-60">
+      <button disabled={loading || Boolean(notice)} className="button-primary mt-6 w-full disabled:opacity-60">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading
-          ? t("verifying")
-          : method === "phone" && !otpSent
-            ? t("sendCode")
-            : method === "phone"
-              ? t("verifyCode")
-              : isSignUp
-                ? t("signup")
-                : t("signin")}
+        {loading ? t("verifying") : isSignUp ? t("signup") : t("signin")}
         {!loading && <ArrowRight className="h-4 w-4" />}
       </button>
 
-      {!isSignUp && method === "email" && (
+      {!staffMode && (
+        <>
+          <div className="my-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-[.14em] text-muted">
+            <span className="h-px flex-1 bg-line" />
+            {t("or")}
+            <span className="h-px flex-1 bg-line" />
+          </div>
+          <button
+            type="button"
+            disabled={loading || Boolean(notice)}
+            onClick={signInWithGoogle}
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-canvas px-5 py-3 text-sm font-black transition hover:border-brand disabled:opacity-60"
+          >
+            <GoogleIcon />
+            {t("continueWithGoogle")}
+          </button>
+        </>
+      )}
+
+      {!isSignUp && (
         <div className="mt-5 rounded-lg border border-line p-4">
           <label className="flex cursor-pointer items-center gap-3 text-sm font-black">
             <input type="checkbox" checked={staffMode} onChange={(event) => setStaffMode(event.target.checked)} className="h-4 w-4 accent-[rgb(var(--brand))]" />

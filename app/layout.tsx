@@ -10,7 +10,7 @@ import { ThemePanel } from "@/components/theme-panel";
 
 export const metadata: Metadata = {
   title: "Simba Marketplace | Shop the world with trust",
-  description: "Shop high definition products and Simba favourites from Rwanda branches with secure checkout and trackable delivery.",
+  description: "High definition products, everyday essentials and Simba favourites delivered from our market to your door.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
