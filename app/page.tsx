@@ -33,7 +33,7 @@ export default function Home() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             aria-hidden="true"
           >
             <source src={videoUrl} type="video/mp4" />
