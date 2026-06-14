@@ -12,6 +12,7 @@ const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 96;
 
 function positiveNumber(value: string | null) {
+  if (value === null || value.trim() === "") return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
 }

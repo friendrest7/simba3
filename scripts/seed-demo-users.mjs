@@ -104,3 +104,73 @@ for (const account of demoAccounts) {
 
   console.log(`${existing ? "Updated" : "Created"} ${account.email} as ${account.role}; existing users were preserved.`);
 }
+
+const buyer = await findUserByEmail("buyer@test.com");
+if (buyer) {
+  const { data: existingOrders, error: existingOrderError } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("user_id", buyer.id)
+    .limit(1);
+  if (!existingOrderError && !existingOrders?.length) {
+    const demoOrders = [
+      {
+        user_id: buyer.id,
+        branch_id: "kigali-kic",
+        status: "delivered",
+        subtotal_rwf: 23_800,
+        delivery_fee_rwf: 2_000,
+        total_rwf: 25_800,
+        delivery_address: {
+          fulfilment: "delivery",
+          district: "Nyarugenge",
+          address: "KN 4 Avenue, Kigali",
+          phone: "+250788000101",
+          slot: "12:00 - 15:00",
+        },
+        payment_method: "mtn_momo",
+      },
+      {
+        user_id: buyer.id,
+        branch_id: "kigali-heights",
+        status: "on_the_way",
+        subtotal_rwf: 17_600,
+        delivery_fee_rwf: 2_500,
+        total_rwf: 20_100,
+        delivery_address: {
+          fulfilment: "delivery",
+          district: "Gasabo",
+          address: "KG 7 Avenue, Kimihurura",
+          phone: "+250788000101",
+          slot: "15:00 - 18:00",
+        },
+        payment_method: "airtel_money",
+      },
+    ];
+    const { data: orders, error: orderError } = await supabase
+      .from("orders")
+      .insert(demoOrders)
+      .select("id, order_number");
+    if (orderError) throw orderError;
+    const itemSets = [
+      [
+        { product_name: "Baba Noor Basmati Rice 5kg", unit_price_rwf: 14_800, quantity: 1 },
+        { product_name: "Inyange milk 1L", unit_price_rwf: 4_500, quantity: 2 },
+      ],
+      [
+        { product_name: "Boni Selection Floor-Cloth Nat. 60X70 3P", unit_price_rwf: 8_600, quantity: 1 },
+        { product_name: "Belle France Toilet Paper decore 6X", unit_price_rwf: 4_500, quantity: 2 },
+      ],
+    ];
+    for (let index = 0; index < (orders || []).length; index += 1) {
+      const order = orders[index];
+      const { error: itemError } = await supabase.from("order_items").insert(
+        itemSets[index].map((item) => ({ ...item, order_id: order.id })),
+      );
+      if (itemError) throw itemError;
+    }
+    console.log("Created non-destructive buyer demo order history.");
+  } else {
+    console.log("Buyer already has order history; no demo orders were added.");
+  }
+}
