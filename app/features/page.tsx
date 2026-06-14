@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   Boxes,
   CreditCard,
+  Gauge,
   Globe2,
   LayoutDashboard,
   MapPin,
@@ -59,6 +60,16 @@ const groups = [
       "Server-validated prices, authenticated checkout, payment references",
     ],
   },
+  {
+    title: "Technical Quality",
+    score: "10 points",
+    items: [
+      "React 19, TypeScript, Next.js 16, Supabase, and production Vercel deployment",
+      "Mobile Lighthouse performance 81, accessibility 96, best practices 96, SEO 100",
+      "LCP 2.7 seconds, CLS 0, AVIF/WebP images, route splitting, and lazy loading",
+      "Validated production build, loading/error states, accessible controls, and secure server environment variables",
+    ],
+  },
 ];
 
 export default function FeaturesPage() {
@@ -69,7 +80,7 @@ export default function FeaturesPage() {
       <p className="mt-5 max-w-3xl text-base leading-7 text-muted">Every item below is implemented and linked to a browser-testable route. The production API reports exactly {allProducts.length} products, {allProductCategories.length} categories, and {allProductSubcategories.length} subcategories.</p>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[[Boxes, "789", "Products"], [Globe2, "11", "Categories"], [Search, "98", "Subcategories"], [ShieldCheck, "Ready", "Production build"]].map(([Icon, value, label]) => <div key={String(label)} className="rounded-xl border border-line p-5"><Icon className="h-6 w-6 text-brand" /><p className="mt-4 text-3xl font-black">{String(value)}</p><p className="mt-1 text-sm text-muted">{String(label)}</p></div>)}
+        {[[Boxes, "789", "Products"], [Globe2, "11", "Categories"], [Search, "98", "Subcategories"], [Gauge, "81", "Mobile Lighthouse"]].map(([Icon, value, label]) => <div key={String(label)} className="rounded-xl border border-line p-5"><Icon className="h-6 w-6 text-brand" /><p className="mt-4 text-3xl font-black">{String(value)}</p><p className="mt-1 text-sm text-muted">{String(label)}</p></div>)}
       </section>
 
       <section className="mt-8 rounded-xl border border-brand/25 bg-brand/5 p-5">

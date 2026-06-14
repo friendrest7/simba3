@@ -29,6 +29,20 @@ https://simba3-ashy.vercel.app
 - Buyer orders, tracking, Buy Again, recurring orders: `/dashboard/client`
 - Admin analytics and order status controls: `/dashboard/admin`
 
+Both supplied accounts were verified with headless Edge against production on June 14, 2026. The buyer reached `/dashboard/client`; the admin reached `/dashboard/admin`.
+
+## Performance evidence
+
+- Mobile Lighthouse performance: 81
+- Accessibility: 96
+- Best Practices: 96
+- SEO: 100
+- First Contentful Paint: 1.1s
+- Largest Contentful Paint: 2.7s
+- Total Blocking Time: 620ms
+- Cumulative Layout Shift: 0
+- Reports: `reports/lighthouse-mobile.report.html` and `reports/lighthouse-mobile.report.json`
+
 ## Trust and localization
 
 - English, French, and Kinyarwanda are available in the header.

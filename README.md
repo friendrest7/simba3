@@ -8,6 +8,8 @@ https://simba3-ashy.vercel.app
 
 Feature verification: https://simba3-ashy.vercel.app/features
 
+Latest mobile Lighthouse audit: Performance 81, Accessibility 96, Best Practices 96, SEO 100, LCP 2.7s, CLS 0. Full HTML and JSON reports are in `reports/`.
+
 ## Test Credentials
 
 Buyer / Customer:
