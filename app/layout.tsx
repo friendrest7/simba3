@@ -3,11 +3,7 @@ import "./globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { StoreProvider } from "@/components/store-provider";
-import { SimbaChat } from "@/components/simba-chat";
-import { CartAddedPanel } from "@/components/cart-added-panel";
-import { PageTranslator } from "@/components/page-translator";
-import { ThemePanel } from "@/components/theme-panel";
-import { MobileCartBar } from "@/components/mobile-cart-bar";
+import { DeferredUtilities } from "@/components/deferred-utilities";
 
 export const metadata: Metadata = {
   title: "Simba Marketplace | Shop the world with trust",
@@ -24,14 +20,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           }}
         />
         <StoreProvider>
-          <PageTranslator />
           <Header />
           <main>{children}</main>
           <Footer />
-          <CartAddedPanel />
-          <MobileCartBar />
-          <SimbaChat />
-          <ThemePanel />
+          <DeferredUtilities />
         </StoreProvider>
       </body>
     </html>

@@ -11,7 +11,6 @@ import { ProductImage } from "@/components/product-image";
 
 export default function Home() {
   const { t } = useStore();
-  const videoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL;
   const categories = allProductCategories.map((name) => {
     const product = allProducts.find((item) => item.category === name)!;
     const count = allProducts.filter((item) => item.category === name).length;
@@ -32,20 +31,16 @@ export default function Home() {
   return (
     <div>
       <section className="relative min-h-[620px] overflow-hidden bg-[#151515] text-white">
-        {videoUrl && (
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/images/landing.jpg"
-            aria-hidden="true"
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-        )}
+        <Image
+          src="/images/landing.jpg"
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          quality={72}
+          className="object-cover"
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,.82),rgba(10,10,10,.45)_58%,rgba(10,10,10,.22))]" />
         <div className="relative mx-auto flex min-h-[620px] max-w-[1500px] items-center px-5 py-20 sm:px-8 lg:px-10">
           <div className="max-w-3xl">
