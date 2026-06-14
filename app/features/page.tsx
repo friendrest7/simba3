@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   MapPin,
   Search,
-  ShieldCheck,
   ShoppingCart,
   Smartphone,
 } from "lucide-react";
