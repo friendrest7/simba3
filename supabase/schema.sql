@@ -47,6 +47,21 @@ create table public.orders (
   updated_at timestamptz not null default now()
 );
 
+create table public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  customer_name text not null,
+  customer_email text not null,
+  rating smallint not null check (rating between 1 and 5),
+  message text not null check (char_length(message) between 1 and 2000),
+  order_id uuid references public.orders(id) on delete set null,
+  order_reference text check (order_reference is null or char_length(order_reference) <= 100),
+  branch_id text,
+  branch_name text,
+  fulfilment_method text check (fulfilment_method is null or fulfilment_method in ('delivery', 'pickup')),
+  created_at timestamptz not null default now()
+);
+
 create table public.order_items (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders(id) on delete cascade,
@@ -89,6 +104,8 @@ create index products_search_idx on public.products using gin (
   to_tsvector('simple', coalesce(name, '') || ' ' || coalesce(category, '') || ' ' || coalesce(brand, '') || ' ' || coalesce(description, ''))
 );
 create index orders_user_idx on public.orders(user_id, created_at desc);
+create index reviews_user_idx on public.reviews(user_id, created_at desc);
+create index reviews_created_idx on public.reviews(created_at desc);
 create index tracking_order_idx on public.delivery_tracking(order_id, created_at desc);
 
 create or replace function public.handle_new_user()
@@ -116,6 +133,7 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
+alter table public.reviews enable row level security;
 alter table public.order_items enable row level security;
 alter table public.cart_items enable row level security;
 alter table public.favourites enable row level security;
@@ -135,6 +153,11 @@ create policy "customers read own orders" on public.orders for select using (use
 create policy "customers create own orders" on public.orders for insert with check (user_id = auth.uid());
 create policy "staff read orders" on public.orders for select using (
   exists (select 1 from public.profiles where id = auth.uid() and role in ('manager', 'admin'))
+);
+create policy "customers create own reviews" on public.reviews for insert with check (user_id = auth.uid());
+create policy "customers read own reviews" on public.reviews for select using (user_id = auth.uid());
+create policy "staff read reviews" on public.reviews for select using (
+  exists (select 1 from public.profiles where id = auth.uid() and role in ('manager', 'admin', 'ceo'))
 );
 create policy "customers read own order items" on public.order_items for select using (
   exists (select 1 from public.orders where id = order_id and user_id = auth.uid())

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { BadgeCheck, CheckCircle2, Clock3, Heart, MapPin, Package, Phone, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DeliveryMap } from "@/components/delivery-map";
+import { ReviewForm } from "@/components/review-form";
 import { StatCard } from "@/components/stat-card";
 import { deliverySteps } from "@/lib/data";
 import { branches, demoDelivery, drivers } from "@/lib/data";
@@ -29,5 +30,6 @@ export default function ClientDashboard() {
     </section>
     <div className="mt-6"><DeliveryMap branchId={branch.id} driverId={driver.id} authorized={demoDelivery.paid && demoDelivery.deliveryFeePaid} /></div>
     <p className="mt-3 text-center text-[10px] text-gray-500">Live driver location is shared only for your paid active delivery and ends after the order is delivered.</p>
+    <ReviewForm defaultOrderId={demoDelivery.id} defaultBranchId={branch.id} defaultFulfilmentMethod="delivery" />
   </DashboardShell>;
 }
