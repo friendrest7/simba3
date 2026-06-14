@@ -19,7 +19,7 @@ export function Footer() {
       title: t("shop"),
       links: [
         [t("marketplace"), "/shop"],
-        [t("deals"), "/shop?category=Fruits"],
+        [t("deals"), "/promotions"],
         [t("wishlist"), "/shop?saved=true"],
       ],
     },
@@ -66,4 +66,3 @@ export function Footer() {
     </footer>
   );
 }
-

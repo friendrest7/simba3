@@ -57,7 +57,7 @@ export function Header() {
     router.refresh();
   }
 
-  const accountHref = user ? `/dashboard/${user.role}` : `/signin?next=${encodeURIComponent(pathname)}`;
+  const accountHref = user ? (user.role === "client" ? "/account" : `/dashboard/${user.role}`) : `/signin?next=${encodeURIComponent(pathname)}`;
   const mobileSelectClass = "min-w-0 rounded-full border border-line bg-canvas px-3 py-2 text-[11px] font-black text-ink outline-none";
 
   return (
@@ -123,7 +123,7 @@ export function Header() {
         <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-6 px-8 text-xs font-bold">
           <Link href="/shop" className="text-brand">{t("allCategories")}</Link>
           <Link href="/shop">{t("marketplace")}</Link>
-          <Link href="/shop?category=Fruits">{t("deals")}</Link>
+          <Link href="/promotions">{t("deals")}</Link>
           <Link href="/dashboard/client">{t("track")}</Link>
           <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-muted">
             <MapPin className="h-4 w-4 text-brand" />
@@ -168,6 +168,7 @@ export function Header() {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link onClick={() => setMenuOpen(false)} href="/shop" className="button-secondary">{t("marketplace")}</Link>
+            <Link onClick={() => setMenuOpen(false)} href="/promotions" className="button-secondary">{t("deals")}</Link>
             <Link onClick={() => setMenuOpen(false)} href="/dashboard/client" className="button-secondary">{t("track")}</Link>
             <Link onClick={() => setMenuOpen(false)} href="/shop?saved=true" className="button-secondary">{t("wishlist")}</Link>
             <Link onClick={() => setMenuOpen(false)} href="/cart" className="button-secondary">{t("cart")}{!!cartCount && <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-[10px] text-white">{cartCount}</span>}</Link>

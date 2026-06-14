@@ -43,7 +43,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @layer components {
   .icon-button {
-    @apply grid h-10 w-10 shrink-0 place-items-center rounded-md border border-transparent text-ink transition hover:border-line hover:bg-black/5 dark:hover:bg-white/10;
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-md border border-transparent text-ink transition hover:border-line hover:bg-black/5 dark:hover:bg-white/10;
   }
   .icon-button svg { @apply h-[18px] w-[18px]; }
   .button-primary {

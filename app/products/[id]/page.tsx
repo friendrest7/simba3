@@ -1,17 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BadgeCheck, ChevronRight, MapPin, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { AddToCart } from "@/components/add-to-cart";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/data";
 import { allProducts } from "@/lib/catalog-products";
 import { Price } from "@/components/price";
 import { BranchAvailability } from "@/components/branch-availability";
-
-export function generateStaticParams() {
-  return products.map((product) => ({ id: product.id }));
-}
+import { ProductGallery } from "@/components/product-gallery";
+import { ProductReviews } from "@/components/product-reviews";
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,7 +20,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     <div className="mx-auto max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10">
       <div className="mb-8 flex items-center gap-2 text-xs text-muted"><Link href="/shop">Marketplace</Link><ChevronRight className="h-3 w-3" /><span>{product.category}</span><ChevronRight className="h-3 w-3" /><span className="text-ink">{product.name}</span></div>
       <div className="grid gap-10 lg:grid-cols-[1.15fr_.85fr] lg:gap-16">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-white"><Image src={product.image} alt={product.name} fill priority className={product.id.startsWith("catalog-") || product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-") ? "object-contain p-8" : "object-cover"} sizes="60vw" /></div>
+        <ProductGallery image={product.image} name={product.name} />
         <div className="flex flex-col justify-center">
           {product.badge && <span className="eyebrow">{product.badge}</span>}
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{product.name}</h1>
@@ -37,7 +33,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <div className="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-6 text-center text-[11px] font-bold text-muted"><span><Truck className="mx-auto mb-2 h-5 w-5 text-ink" />Fast delivery</span><span><ShieldCheck className="mx-auto mb-2 h-5 w-5 text-ink" />Secure payment</span><span><RotateCcw className="mx-auto mb-2 h-5 w-5 text-ink" />Easy returns</span></div>
         </div>
       </div>
-      {related.length > 0 && <section className="py-20"><h2 className="section-title">More from this aisle</h2><div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-7">{related.map((item) => <ProductCard key={item.id} product={item} />)}</div></section>}
+      <ProductReviews productKey={product.id} />
+      {related.length > 0 && <section className="py-14"><h2 className="section-title">More from this aisle</h2><div className="mt-8 flex snap-x gap-4 overflow-x-auto pb-4">{related.map((item) => <div key={item.id} className="w-[70vw] max-w-[300px] shrink-0 snap-start sm:w-[280px]"><ProductCard product={item} /></div>)}</div></section>}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import type { AuthChangeEvent, Session, User as SupabaseUser } from "@supabase/s
 import { branches, CurrencyCode, Product } from "@/lib/data";
 import { LanguageCode, languageCodes, translate } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
+import { allProducts } from "@/lib/catalog-products";
 
 export type CartItem = { product: Product; quantity: number };
 export type User = {
@@ -72,12 +73,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [savedProductIds, setSavedProductIds] = useState<string[]>([]);
   const [managedProducts, setManagedProducts] = useState<Product[]>([]);
   const [ready, setReady] = useState(false);
+  const [accountStateReady, setAccountStateReady] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("simba-cart");
     const savedTheme = localStorage.getItem("simba-theme") as "light" | "dark" | null;
     const savedAccent = localStorage.getItem("simba-accent") as Accent | null;
+    const savedCurrency = localStorage.getItem("simba-currency") as CurrencyCode | null;
     const savedBranchId = localStorage.getItem("simba-branch");
     const savedLanguage = localStorage.getItem("simba-language") as LanguageCode | null;
     const savedProducts = localStorage.getItem("simba-saved-products");
@@ -93,7 +96,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("simba-managed-products");
     }
     if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
+    else if (window.matchMedia("(prefers-color-scheme: dark)").matches) setTheme("dark");
     if (savedAccent) setAccentState(savedAccent);
+    if (savedCurrency && Object.hasOwn({ RWF: true, ZAR: true, USD: true, EUR: true, GBP: true, BWP: true }, savedCurrency)) setCurrencyState(savedCurrency);
     if (savedBranchId && branches.some((branch) => branch.id === savedBranchId)) setSelectedBranchIdState(savedBranchId);
     if (savedLanguage && languageCodes.includes(savedLanguage)) setLanguageState(savedLanguage);
     setReady(true);
@@ -112,6 +117,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (!active) return;
       if (!authUser) {
         setUser(null);
+        setAccountStateReady(false);
         setAuthLoading(false);
         return;
       }
@@ -154,6 +160,57 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   useEffect(() => {
+    if (!ready || !user || accountStateReady) return;
+    let active = true;
+
+    fetch("/api/account/state")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: { cart?: Array<{ productId: string; quantity: number }>; wishlist?: string[] } | null) => {
+        if (!active) return;
+        const productMap = new Map(allProducts.map((product) => [product.id, product]));
+        setCart((localCart) => {
+          const merged = new Map(localCart.map((item) => [item.product.id, item]));
+          for (const savedItem of data?.cart || []) {
+            const product = productMap.get(savedItem.productId);
+            if (!product) continue;
+            const existing = merged.get(product.id);
+            merged.set(product.id, {
+              product,
+              quantity: Math.max(existing?.quantity || 0, Math.min(product.stock, savedItem.quantity)),
+            });
+          }
+          return Array.from(merged.values()).filter((item) => item.quantity > 0);
+        });
+        setSavedProductIds((localIds) => Array.from(new Set([...localIds, ...(data?.wishlist || [])])));
+      })
+      .catch(() => {
+        // Local state remains fully functional if the optional sync migration is unavailable.
+      })
+      .finally(() => {
+        if (active) setAccountStateReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [accountStateReady, ready, user]);
+
+  useEffect(() => {
+    if (!ready || !user || !accountStateReady) return;
+    const timer = window.setTimeout(() => {
+      void fetch("/api/account/state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cart: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+          wishlist: savedProductIds,
+        }),
+      });
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [accountStateReady, cart, ready, savedProductIds, user]);
+
+  useEffect(() => {
     if (!ready) return;
     localStorage.setItem("simba-cart", JSON.stringify(cart));
     localStorage.setItem("simba-theme", theme);
@@ -169,11 +226,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [cart, theme, accent, currency, selectedBranchId, language, savedProductIds, managedProducts, ready]);
 
   const addToCart = (product: Product, quantity = 1) => {
+    if (product.stock <= 0) return;
     setCart((items) => {
       const existing = items.find((item) => item.product.id === product.id);
       return existing
-        ? items.map((item) => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item)
-        : [...items, { product, quantity }];
+        ? items.map((item) => item.product.id === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item)
+        : [...items, { product, quantity: Math.min(product.stock, Math.max(1, quantity)) }];
     });
     setRecentAdds((items) => {
       const existing = items.find((item) => item.product.id === product.id);
@@ -213,6 +271,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     signOut: async () => {
       if (supabase) await supabase.auth.signOut();
       setUser(null);
+      setAccountStateReady(false);
     },
     toggleTheme: () => setTheme((value) => value === "light" ? "dark" : "light"),
     setAccent: setAccentState,

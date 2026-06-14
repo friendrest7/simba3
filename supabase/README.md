@@ -1,8 +1,9 @@
 # Supabase setup
 
 1. Open the Supabase SQL Editor and run `supabase/schema.sql`.
-2. In Authentication settings, enable Email authentication.
-3. Set the Site URL to the deployed application URL and add local/Vercel callback URLs, including `http://localhost:3000/auth/callback`.
+2. Run `supabase/commerce-upgrade.sql` to add synced carts, wishlists, addresses, payments, tracking events, verified product reviews, and recurring orders.
+3. In Authentication settings, enable Email authentication.
+4. Set the Site URL to the deployed application URL and add local/Vercel callback URLs, including `http://localhost:3000/auth/callback`.
 4. Phone Auth is optional and is not required by this application. The signup phone field is profile information only.
 5. The schema creates a public Storage bucket named `simba-assets`.
 6. Upload the landing video to `simba-assets/Landing/`.
@@ -47,3 +48,10 @@ Phone/SMS authentication may require a paid Supabase plan and a configured SMS p
 Use a public object URL for a permanent landing video. Signed URLs are suitable for private files but can expire.
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. Never prefix it with `NEXT_PUBLIC_` or expose it in browser code.
+
+## Demo grader accounts
+
+Run `npm run seed:demo` after applying the schema. The command is non-destructive: it creates the accounts when absent and updates only the two matching email accounts when present. It never deletes users.
+
+- Buyer: `buyer@test.com` / `password123`
+- Market Rep / Admin: `admin@test.com` / `admin123`

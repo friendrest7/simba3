@@ -28,6 +28,7 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const pathname = request.nextUrl.pathname;
   const protectedRoute = pathname === "/checkout"
+    || pathname.startsWith("/account")
     || pathname.startsWith("/dashboard/")
     || pathname.startsWith("/shop/admin");
 

@@ -1,7 +1,11 @@
 export type Product = {
   id: string;
+  datasetId?: number;
   name: string;
   category: string;
+  subcategoryId?: number;
+  subcategory?: string;
+  brand?: string;
   price: number;
   oldPrice?: number;
   image: string;
@@ -152,3 +156,9 @@ export const formatPrice = (price: number, currency: CurrencyCode = "RWF") => {
   }).format(converted);
   return `${option.symbol} ${amount}`;
 };
+
+export function getStockStatus(product: Product) {
+  if (product.availability === "sold-out" || product.stock <= 0) return "out-of-stock" as const;
+  if (product.stock <= 10) return "low-stock" as const;
+  return "in-stock" as const;
+}

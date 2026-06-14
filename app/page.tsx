@@ -4,13 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
-import { categories, products } from "@/lib/data";
+import { allProductCategories, allProducts } from "@/lib/catalog-products";
 import { cleanSearchQuery } from "@/lib/product-search";
 import { useStore } from "@/components/store-provider";
+import { ProductImage } from "@/components/product-image";
 
 export default function Home() {
   const { t } = useStore();
   const videoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL;
+  const categories = allProductCategories.map((name) => {
+    const product = allProducts.find((item) => item.category === name)!;
+    const count = allProducts.filter((item) => item.category === name).length;
+    return { name, image: product.image, count, query: name };
+  });
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>) {
     const form = event.currentTarget;
@@ -33,7 +39,8 @@ export default function Home() {
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
+            poster="/images/landing.jpg"
             aria-hidden="true"
           >
             <source src={videoUrl} type="video/mp4" />
@@ -60,9 +67,9 @@ export default function Home() {
             </div>
             <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3 border-t border-white/20 pt-6">
               {[
-                ["16+", t("productsReady")],
+                ["789", t("productsReady")],
                 ["30-45", t("deliveryMinutes")],
-                ["8", t("marketBranches")],
+                ["9", t("marketBranches")],
               ].map(([value, label]) => (
                 <div key={String(label)}>
                   <p className="text-2xl font-black sm:text-3xl">{value}</p>
@@ -82,13 +89,14 @@ export default function Home() {
           </div>
           <Link href="/shop" className="flex items-center gap-2 text-sm font-black text-brand">{t("viewAll")} <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {categories.slice(0, 8).map((category) => (
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11">
+          {categories.map((category) => (
             <Link href={`/shop?category=${encodeURIComponent(category.query)}`} key={category.name} className="group rounded-lg border border-line bg-canvas p-2 transition hover:border-brand">
               <div className="relative aspect-square overflow-hidden rounded-md bg-white">
-                <Image src={category.image} alt={category.name} fill className="object-cover transition duration-300 group-hover:scale-105" sizes="180px" />
+                <ProductImage src={category.image} alt={category.name} fill className="object-contain p-2 transition duration-300 group-hover:scale-105" sizes="180px" />
               </div>
-              <p className="px-1 pb-2 pt-3 text-sm font-black">{category.name}</p>
+              <p className="px-1 pt-3 text-sm font-black">{category.name}</p>
+              <p className="px-1 pb-2 pt-1 text-[10px] text-muted">{category.count} products</p>
             </Link>
           ))}
         </div>
@@ -105,7 +113,7 @@ export default function Home() {
             <Link href="/shop" className="hidden items-center gap-2 text-sm font-black text-brand sm:flex">{t("viewAll")} <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 lg:grid-cols-5">
-            {products.slice(0, 10).map((product) => <ProductCard key={product.id} product={product} />)}
+            {allProducts.slice(0, 10).map((product) => <ProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>

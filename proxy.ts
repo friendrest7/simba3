@@ -8,10 +8,10 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/checkout/:path*",
+    "/account/:path*",
     "/dashboard/:path*",
     "/shop/admin/:path*",
     "/signin",
     "/signup",
   ],
 };
-

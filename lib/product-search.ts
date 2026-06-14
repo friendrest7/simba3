@@ -103,7 +103,9 @@ export function searchProducts(items: Product[], query: string, limit?: number) 
 
     const name = normalize(product.name);
     const category = normalize(product.category);
+    const subcategory = normalize(product.subcategory || "");
     const seller = normalize(product.seller);
+    const brand = normalize(product.brand || "");
     const badge = normalize(product.badge || "");
     const description = normalize(product.description);
     const unit = normalize(product.unit);
@@ -112,6 +114,8 @@ export function searchProducts(items: Product[], query: string, limit?: number) 
     for (const term of terms) {
       if (name.includes(term)) score += 9;
       if (category.includes(term)) score += 6;
+      if (subcategory.includes(term)) score += 5;
+      if (brand.includes(term)) score += 5;
       if (badge.includes(term)) score += 4;
       if (unit.includes(term)) score += 3;
       if (description.includes(term)) score += 2;

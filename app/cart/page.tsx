@@ -1,15 +1,23 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useStore } from "@/components/store-provider";
 import { Price } from "@/components/price";
+import { ProductImage } from "@/components/product-image";
+import { ProductCard } from "@/components/product-card";
+import { allProducts } from "@/lib/catalog-products";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, t } = useStore();
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;
+  const cartIds = new Set(cart.map((item) => item.product.id));
+  const cartCategories = new Set(cart.map((item) => item.product.category));
+  const recommendations = allProducts
+    .filter((product) => !cartIds.has(product.id))
+    .sort((a, b) => Number(cartCategories.has(b.category)) - Number(cartCategories.has(a.category)) || b.rating - a.rating)
+    .slice(0, 4);
 
   return (
     <div className="mx-auto min-h-[70vh] max-w-[1200px] px-5 py-12 sm:px-8">
@@ -29,7 +37,7 @@ export default function CartPage() {
             {cart.map(({ product, quantity }) => (
               <div key={product.id} className="grid grid-cols-[100px_1fr] gap-4 py-5 sm:grid-cols-[130px_1fr_auto]">
                 <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden rounded-lg border border-line bg-white">
-                  <Image src={product.image} alt={product.name} fill className={product.category.includes("Simba") || product.image.endsWith(".svg") || product.image.includes("product-") ? "object-contain p-3" : "object-cover"} sizes="130px" />
+                  <ProductImage src={product.image} alt={product.name} fill className="object-contain p-3" sizes="130px" />
                 </Link>
                 <div className="min-w-0 py-1">
                   <p className="text-[10px] font-black uppercase text-muted">{product.category}</p>
@@ -60,7 +68,7 @@ export default function CartPage() {
           </aside>
         </div>
       )}
+      {!!cart.length && <section className="mt-16 border-t border-line pt-10"><span className="eyebrow">Complete your basket</span><h2 className="mt-2 text-2xl font-black">Recommended for your cart</h2><p className="mt-2 text-sm text-muted">Suggestions update from the categories already in your basket.</p><div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">{recommendations.map((product) => <ProductCard key={product.id} product={product} />)}</div></section>}
     </div>
   );
 }
-

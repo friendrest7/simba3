@@ -7,6 +7,7 @@ import { SimbaChat } from "@/components/simba-chat";
 import { CartAddedPanel } from "@/components/cart-added-panel";
 import { PageTranslator } from "@/components/page-translator";
 import { ThemePanel } from "@/components/theme-panel";
+import { MobileCartBar } from "@/components/mobile-cart-bar";
 
 export const metadata: Metadata = {
   title: "Simba Marketplace | Shop the world with trust",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main>{children}</main>
           <Footer />
           <CartAddedPanel />
+          <MobileCartBar />
           <SimbaChat />
           <ThemePanel />
         </StoreProvider>

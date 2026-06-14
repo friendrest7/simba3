@@ -198,6 +198,16 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     }
   }
 
+  function fillDemoAccount(kind: "buyer" | "admin") {
+    const admin = kind === "admin";
+    setEmail(admin ? "admin@test.com" : "buyer@test.com");
+    setPassword(admin ? "admin123" : "password123");
+    setStaffMode(admin);
+    if (admin) setStaffRole("admin");
+    setAuthError("");
+    setNotice("");
+  }
+
   return (
     <form onSubmit={submit} className="w-full max-w-md">
       <span className="eyebrow">{isSignUp ? t("joinMarketplace") : t("welcomeBack")}</span>
@@ -236,7 +246,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       )}
 
       <div className="mt-4">
-        <label className="form-label">{t("password")}</label>
+        <div className="flex items-center justify-between"><label className="form-label">{t("password")}</label>{!isSignUp && <Link href="/forgot-password" className="mb-2 text-xs font-bold text-brand">{t("forgotPassword")}</Link>}</div>
         <div className="relative">
           <LockKeyhole className="input-icon" />
           <input required type={showPassword ? "text" : "password"} minLength={8} autoComplete={isSignUp ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} className="form-input px-11" />
@@ -286,22 +296,45 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       )}
 
       {!isSignUp && (
-        <div className="mt-5 rounded-lg border border-line p-4">
-          <label className="flex cursor-pointer items-center gap-3 text-sm font-black">
-            <input type="checkbox" checked={staffMode} onChange={(event) => setStaffMode(event.target.checked)} className="h-4 w-4 accent-[rgb(var(--brand))]" />
-            <ShieldCheck className="h-4 w-4 text-brand" />
-            {t("signInAsStaff")}
-          </label>
-          {staffMode && (
-            <div className="mt-4">
-              <label className="form-label">{t("staffRole")}</label>
-              <select value={staffRole} onChange={(event) => setStaffRole(event.target.value as StaffRole)} className="form-input">
-                {staffRoles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
-              </select>
-              <p className="mt-2 text-[11px] leading-5 text-muted">{t("staffRoleHelp")}</p>
+        <>
+          <section className="mt-5 rounded-lg border border-brand/25 bg-brand/5 p-4" aria-labelledby="demo-accounts-title">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 id="demo-accounts-title" className="text-sm font-black">Test credentials</h2>
+                <p className="mt-1 text-[11px] text-muted">Select an account, then press Sign in.</p>
+              </div>
+              <ShieldCheck className="h-5 w-5 text-brand" />
             </div>
-          )}
-        </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => fillDemoAccount("buyer")} className="min-h-14 rounded-md border border-line bg-canvas p-3 text-left text-xs transition hover:border-brand">
+                <strong className="block">Buyer</strong>
+                <span className="mt-1 block text-muted">buyer@test.com</span>
+                <span className="block text-muted">password123</span>
+              </button>
+              <button type="button" onClick={() => fillDemoAccount("admin")} className="min-h-14 rounded-md border border-line bg-canvas p-3 text-left text-xs transition hover:border-brand">
+                <strong className="block">Market Rep / Admin</strong>
+                <span className="mt-1 block text-muted">admin@test.com</span>
+                <span className="block text-muted">admin123</span>
+              </button>
+            </div>
+          </section>
+          <div className="mt-5 rounded-lg border border-line p-4">
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-black">
+              <input type="checkbox" checked={staffMode} onChange={(event) => setStaffMode(event.target.checked)} className="h-4 w-4 accent-[rgb(var(--brand))]" />
+              <ShieldCheck className="h-4 w-4 text-brand" />
+              {t("signInAsStaff")}
+            </label>
+            {staffMode && (
+              <div className="mt-4">
+                <label className="form-label">{t("staffRole")}</label>
+                <select value={staffRole} onChange={(event) => setStaffRole(event.target.value as StaffRole)} className="form-input">
+                  {staffRoles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
+                </select>
+                <p className="mt-2 text-[11px] leading-5 text-muted">{t("staffRoleHelp")}</p>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       <p className="mt-6 text-center text-sm text-muted">
