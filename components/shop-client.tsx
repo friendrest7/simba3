@@ -30,6 +30,14 @@ type CatalogResponse = {
   catalog: { productCount: number; categoryCount: number; subcategoryCount: number };
 };
 
+type ShopClientProps = {
+  initialProducts?: Product[];
+  initialCategories?: string[];
+  initialSubcategories?: Subcategory[];
+  initialTotal?: number;
+  initialPageCount?: number;
+};
+
 const availabilityOptions = [
   ["all", "All availability"],
   ["in-stock", "In stock"],
@@ -37,7 +45,13 @@ const availabilityOptions = [
   ["out-of-stock", "Out of stock"],
 ] as const;
 
-export function ShopClient() {
+export function ShopClient({
+  initialProducts = [],
+  initialCategories = [],
+  initialSubcategories = [],
+  initialTotal = 789,
+  initialPageCount = 33,
+}: ShopClientProps) {
   const { selectedBranchId, setSelectedBranchId, savedProductIds, t } = useStore();
   const params = useSearchParams();
   const router = useRouter();
@@ -52,13 +66,13 @@ export function ShopClient() {
   const [availability, setAvailability] = useState(params.get("availability") || "all");
   const [sort, setSort] = useState(params.get("sort") || "relevance");
   const [page, setPage] = useState(Math.max(1, Number(params.get("page") || 1)));
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [total, setTotal] = useState(0);
-  const [pageCount, setPageCount] = useState(1);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<string[]>(initialCategories);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>(initialSubcategories);
+  const [total, setTotal] = useState(initialTotal);
+  const [pageCount, setPageCount] = useState(initialPageCount);
   const [catalogMeta, setCatalogMeta] = useState({ productCount: 789, categoryCount: 11, subcategoryCount: 98 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
 

@@ -37,6 +37,7 @@ export function Footer() {
       links: [
         [t("track"), "/dashboard/client"],
         [t("askSimba"), "/shop"],
+        ["Feature verification", "/features"],
       ],
     },
   ];
