@@ -1,12 +1,10 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { AuthChangeEvent, Session, User as SupabaseUser } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { AuthChangeEvent, Session, SupabaseClient, User as SupabaseUser } from "@supabase/supabase-js";
 import { branches, CurrencyCode, Product } from "@/lib/data";
 import { LanguageCode, languageCodes, translate } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/client";
-import { allProducts } from "@/lib/catalog-products";
 
 export type CartItem = { product: Product; quantity: number };
 export type User = {
@@ -74,7 +72,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [managedProducts, setManagedProducts] = useState<Product[]>([]);
   const [ready, setReady] = useState(false);
   const [accountStateReady, setAccountStateReady] = useState(false);
-  const supabase = useMemo(() => createClient(), []);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [supabaseReady, setSupabaseReady] = useState(false);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("simba-cart");
@@ -105,11 +104,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    const needsImmediateAuth = /^\/(account|checkout|dashboard|signin|signup|forgot-password|reset-password)(\/|$)/.test(window.location.pathname);
+
+    async function loadSupabase() {
+      const { createClient } = await import("@/lib/supabase/client");
+      if (!active) return;
+      setSupabase(createClient());
+      setSupabaseReady(true);
+    }
+
+    const timer = window.setTimeout(() => void loadSupabase(), needsImmediateAuth ? 0 : 4000);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!supabaseReady) return;
     if (!supabase) {
       console.error("Supabase public environment variables are not configured.");
       setAuthLoading(false);
       return;
     }
+    const client = supabase;
 
     let active = true;
 
@@ -122,7 +141,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile } = await client
         .from("profiles")
         .select("full_name, role, branch_id")
         .eq("id", authUser.id)
@@ -144,12 +163,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function loadInitialUser() {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await client.auth.getUser();
       await syncUser(data.user);
     }
 
     void loadInitialUser();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+    const { data: listener } = client.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       void syncUser(session?.user || null);
     });
 
@@ -157,17 +176,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, supabaseReady]);
 
   useEffect(() => {
     if (!ready || !user || accountStateReady) return;
     let active = true;
 
-    fetch("/api/account/state")
-      .then((response) => response.ok ? response.json() : null)
-      .then((data: { cart?: Array<{ productId: string; quantity: number }>; wishlist?: string[] } | null) => {
+    async function loadAccountState() {
+      try {
+        const response = await fetch("/api/account/state");
+        const data = response.ok
+          ? await response.json() as { cart?: Array<{ productId: string; quantity: number }>; wishlist?: string[] }
+          : null;
+        const productIds = Array.from(new Set((data?.cart || []).map((item) => item.productId)));
+        const productResponse = productIds.length > 0
+          ? await fetch(`/api/products?ids=${encodeURIComponent(productIds.join(","))}&pageSize=${Math.min(96, productIds.length)}`)
+          : null;
+        const productData = productResponse?.ok
+          ? await productResponse.json() as { products?: Product[] }
+          : null;
+
         if (!active) return;
-        const productMap = new Map(allProducts.map((product) => [product.id, product]));
+        const productMap = new Map((productData?.products || []).map((product) => [product.id, product]));
         setCart((localCart) => {
           const merged = new Map(localCart.map((item) => [item.product.id, item]));
           for (const savedItem of data?.cart || []) {
@@ -182,13 +212,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           return Array.from(merged.values()).filter((item) => item.quantity > 0);
         });
         setSavedProductIds((localIds) => Array.from(new Set([...localIds, ...(data?.wishlist || [])])));
-      })
-      .catch(() => {
+      } catch {
         // Local state remains fully functional if the optional sync migration is unavailable.
-      })
-      .finally(() => {
+      } finally {
         if (active) setAccountStateReady(true);
-      });
+      }
+    }
+
+    void loadAccountState();
 
     return () => {
       active = false;

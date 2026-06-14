@@ -20,6 +20,13 @@ function positiveNumber(value: string | null) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = cleanSearchQuery(searchParams.get("q") || "");
+  const requestedIds = new Set(
+    (searchParams.get("ids") || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+      .slice(0, MAX_PAGE_SIZE),
+  );
   const category = searchParams.get("category")?.trim() || "All";
   const subcategoryId = positiveNumber(searchParams.get("subcategory"));
   const minPrice = positiveNumber(searchParams.get("minPrice"));
@@ -34,6 +41,7 @@ export async function GET(request: Request) {
     : DEFAULT_PAGE_SIZE;
 
   let filtered = allProducts.filter((product) => {
+    if (requestedIds.size > 0 && !requestedIds.has(product.id)) return false;
     if (category !== "All" && product.category !== category) return false;
     if (subcategoryId !== null && product.subcategoryId !== subcategoryId) return false;
 
