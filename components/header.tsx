@@ -58,10 +58,17 @@ export function Header() {
   }
 
   const accountHref = user ? `/dashboard/${user.role}` : `/signin?next=${encodeURIComponent(pathname)}`;
+  const mobileSelectClass = "min-w-0 rounded-full border border-line bg-canvas px-3 py-2 text-[11px] font-black text-ink outline-none";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-canvas/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex h-[74px] max-w-[1500px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8">
+    <header
+      className="sticky top-0 z-50 border-b border-line/80 bg-canvas/95 shadow-sm backdrop-blur"
+      style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .12), 0 10px 24px rgb(0 0 0 / .04)" }}
+    >
+      <div
+        className="mx-auto flex h-[74px] max-w-[1500px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8"
+        style={{ background: "linear-gradient(90deg, rgb(var(--brand) / .10), transparent 52%)" }}
+      >
         <Logo />
 
         <form onSubmit={submitSearch} className="relative hidden min-w-0 flex-1 md:block">
@@ -95,8 +102,16 @@ export function Header() {
             <span>{t("cart")}</span>
           </Link>
           <button
+            type="button"
+            onClick={toggleTheme}
+            className="hidden h-11 items-center gap-2 rounded-full border border-line bg-canvas px-3 text-xs font-black text-ink transition hover:border-brand hover:text-brand lg:flex"
+          >
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {theme === "light" ? t("darkMode") : t("lightMode")}
+          </button>
+          <button
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-11 w-11 place-items-center rounded-md border border-line lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-line bg-canvas text-ink transition hover:border-brand hover:text-brand lg:hidden"
             aria-label={t("menu")}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -110,61 +125,57 @@ export function Header() {
           <Link href="/shop">{t("marketplace")}</Link>
           <Link href="/shop?category=Fruits">{t("deals")}</Link>
           <Link href="/dashboard/client">{t("track")}</Link>
-          <label className="ml-auto flex cursor-pointer items-center gap-2 text-muted">
+          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-muted">
             <MapPin className="h-4 w-4 text-brand" />
             <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-ink outline-none">
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
             </select>
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-muted">
+          <label className="flex cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-muted">
             <Languages className="h-4 w-4 text-brand" />
             <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="bg-transparent font-bold text-ink outline-none">
               {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
             </select>
           </label>
-          <button onClick={toggleTheme} className="flex items-center gap-2 text-muted">
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            {theme === "light" ? t("darkMode") : t("lightMode")}
-          </button>
           {user && <button onClick={handleSignOut} className="font-black text-brand">{t("signout")}</button>}
         </div>
       </div>
 
       {menuOpen && (
-        <div className="border-t border-line bg-canvas p-4 lg:hidden">
+        <div className="border-t border-line bg-canvas p-4 lg:hidden" style={{ background: "linear-gradient(180deg, rgb(var(--brand) / .08), transparent 52%)" }}>
           <form onSubmit={submitSearch} className="relative md:hidden">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("search")} className="form-input pl-11 pr-12" />
             <button className="absolute right-1.5 top-1.5 grid h-9 w-9 place-items-center rounded-md bg-brand text-white"><Search className="h-4 w-4" /></button>
           </form>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="relative">
-              <span className="form-label">{t("shoppingBranch")}</span>
-              <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="form-input">
-                {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <button type="button" onClick={toggleTheme} className="flex items-center justify-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-xs font-black text-ink">
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              {theme === "light" ? t("darkMode") : t("lightMode")}
+            </button>
+            <label className="flex items-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-muted">
+              <Languages className="h-4 w-4 text-brand" />
+              <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className={mobileSelectClass}>
+                {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
               </select>
             </label>
-            <label>
-              <span className="form-label">{t("language")}</span>
-              <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="form-input">
-                {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
+            <label className="flex items-center gap-2 rounded-full border border-line bg-canvas px-3 py-2 text-muted">
+              <MapPin className="h-4 w-4 text-brand" />
+              <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className={mobileSelectClass}>
+                {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
               </select>
             </label>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link onClick={() => setMenuOpen(false)} href="/shop" className="button-secondary">{t("marketplace")}</Link>
             <Link onClick={() => setMenuOpen(false)} href="/dashboard/client" className="button-secondary">{t("track")}</Link>
-            <button onClick={toggleTheme} className="button-secondary">
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-              {theme === "light" ? t("darkMode") : t("lightMode")}
-            </button>
-            {user
-              ? <button onClick={handleSignOut} className="button-primary">{t("signout")}</button>
-              : <Link onClick={() => setMenuOpen(false)} href="/signin" className="button-primary">{t("signin")}</Link>}
+            <Link onClick={() => setMenuOpen(false)} href="/shop?saved=true" className="button-secondary">{t("wishlist")}</Link>
+            <Link onClick={() => setMenuOpen(false)} href="/cart" className="button-secondary">{t("cart")}{!!cartCount && <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-[10px] text-white">{cartCount}</span>}</Link>
+            {user && <Link onClick={() => setMenuOpen(false)} href={accountHref} className="button-secondary">{t("account")}</Link>}
+            {user ? <button onClick={handleSignOut} className="button-primary">{t("signout")}</button> : <Link onClick={() => setMenuOpen(false)} href="/signin" className="button-primary">{t("signin")}</Link>}
           </div>
         </div>
       )}
     </header>
   );
 }
-

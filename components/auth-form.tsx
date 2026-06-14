@@ -81,6 +81,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [loading, setLoading] = useState(false);
 
   async function profileFor(user: SupabaseUser) {
+    if (!supabase) throw new Error("Supabase authentication is not configured.");
+
     const { data, error } = await supabase
       .from("profiles")
       .select("role")
@@ -90,6 +92,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   }
 
   async function finishAuthentication(user: SupabaseUser) {
+    if (!supabase) throw new Error("Supabase authentication is not configured.");
+
     const { profile, error } = await profileFor(user);
     const role = profile?.role || "customer";
 
@@ -121,6 +125,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     setLoading(true);
 
     try {
+      if (!supabase) throw new Error("Supabase authentication is not configured.");
+
       if (isSignUp) {
         if (password !== confirmPassword) throw new Error("The passwords do not match.");
         if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
@@ -169,6 +175,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     setLoading(true);
 
     try {
+      if (!supabase) throw new Error("Supabase authentication is not configured.");
+
       const next = destination || "/dashboard/client";
       const redirectTo = new URL("/auth/callback", window.location.origin);
       redirectTo.searchParams.set("next", next);
@@ -249,9 +257,10 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       )}
 
       {authError && <p role="alert" className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{authError}</p>}
+      {!supabase && <p role="alert" className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs font-bold text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">Authentication is temporarily unavailable because Supabase is not configured.</p>}
       {notice && <p className="mt-4 flex items-center gap-2 rounded-md border border-green-300 bg-green-50 p-3 text-xs font-bold text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-200"><CheckCircle2 className="h-4 w-4" /> {notice}</p>}
 
-      <button disabled={loading || Boolean(notice)} className="button-primary mt-6 w-full disabled:opacity-60">
+      <button disabled={!supabase || loading || Boolean(notice)} className="button-primary mt-6 w-full disabled:opacity-60">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {loading ? t("verifying") : isSignUp ? t("signup") : t("signin")}
         {!loading && <ArrowRight className="h-4 w-4" />}
@@ -266,7 +275,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           </div>
           <button
             type="button"
-            disabled={loading || Boolean(notice)}
+            disabled={!supabase || loading || Boolean(notice)}
             onClick={signInWithGoogle}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-canvas px-5 py-3 text-sm font-black transition hover:border-brand disabled:opacity-60"
           >

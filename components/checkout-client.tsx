@@ -60,6 +60,8 @@ export function CheckoutClient() {
     const formData = new FormData(event.currentTarget);
     setPlacingOrder(true);
     try {
+      if (!supabase) throw new Error("Checkout is unavailable because Supabase is not configured.");
+
       const subtotalRwf = Math.round(subtotal * 1450);
       const deliveryFeeRwf = Math.round(deliveryFee * 1450);
       const { data: order, error: orderInsertError } = await supabase

@@ -100,6 +100,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!supabase) {
+      console.error("Supabase public environment variables are not configured.");
+      setAuthLoading(false);
+      return;
+    }
+
     let active = true;
 
     async function syncUser(authUser: SupabaseUser | null) {
@@ -205,7 +211,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     },
     closeCartPanel: () => setCartPanelOpen(false),
     signOut: async () => {
-      await supabase.auth.signOut();
+      if (supabase) await supabase.auth.signOut();
       setUser(null);
     },
     toggleTheme: () => setTheme((value) => value === "light" ? "dark" : "light"),
