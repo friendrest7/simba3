@@ -15,7 +15,27 @@ export type User = {
   branchId?: string;
   driverId?: string;
 };
-export type Accent = "red" | "green" | "blue" | "purple" | "amber" | "teal";
+export type Accent =
+  | "red"
+  | "green"
+  | "blue"
+  | "purple"
+  | "amber"
+  | "teal"
+  | "orange"
+  | "pink"
+  | "rose"
+  | "fuchsia"
+  | "violet"
+  | "indigo"
+  | "cyan"
+  | "sky"
+  | "emerald"
+  | "lime"
+  | "yellow"
+  | "brown"
+  | "slate"
+  | "black";
 export type { LanguageCode } from "@/lib/i18n";
 
 type StoreContextValue = {
@@ -95,7 +115,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("simba-managed-products");
     }
     if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
-    else if (window.matchMedia("(prefers-color-scheme: dark)").matches) setTheme("dark");
     if (savedAccent) setAccentState(savedAccent);
     if (savedCurrency && Object.hasOwn({ RWF: true, ZAR: true, USD: true, EUR: true, GBP: true, BWP: true }, savedCurrency)) setCurrencyState(savedCurrency);
     if (savedBranchId && branches.some((branch) => branch.id === savedBranchId)) setSelectedBranchIdState(savedBranchId);

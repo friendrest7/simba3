@@ -58,7 +58,7 @@ function localReply(message: string, matches: Product[]) {
   return "I could not find a close catalog match yet. Tell me the product type, budget, or intended use, such as breakfast, healthy snacks, or groceries under FRw 10,000.";
 }
 
-function geminiContents(messages: ChatMessage[], matchedProducts: Product[]) {
+function groqMessages(messages: ChatMessage[], matchedProducts: Product[]) {
   const firstUserIndex = messages.findIndex((message) => message.role === "user");
   const conversation = (firstUserIndex >= 0 ? messages.slice(firstUserIndex) : messages).slice(-6);
   const grounding = matchedProducts.length
@@ -74,14 +74,27 @@ function geminiContents(messages: ChatMessage[], matchedProducts: Product[]) {
     })))
     : "[]";
 
-  return conversation.map((message, index) => ({
-    role: message.role === "assistant" ? "model" : "user",
-    parts: [{
-      text: index === conversation.length - 1
+  return [
+    {
+      role: "system",
+      content: [
+        "You are Simba AI, the conversational product search assistant for Simba Supermarket Rwanda.",
+        "The application searches its catalog before asking you to respond.",
+        "Treat MATCHED_PRODUCTS_FROM_SIMBA_CATALOG as the complete and authoritative search result for the current request.",
+        "Only recommend products in that list. Never invent a product, price, stock status, seller, or promotion.",
+        "Use exact product names and prices from the list. Prefer available products.",
+        "If the list is empty for a product request, ask one short clarifying question instead of suggesting outside products.",
+        "For service questions: Track opens delivery status and ETA; checkout supports mobile money, card, and cash where available; branch selection controls availability.",
+        "Reply in friendly plain text without Markdown and stay under 90 words.",
+      ].join(" "),
+    },
+    ...conversation.map((message, index) => ({
+      role: message.role,
+      content: index === conversation.length - 1
         ? `${message.content}\n\nMATCHED_PRODUCTS_FROM_SIMBA_CATALOG: ${grounding}`
         : message.content,
-    }],
-  }));
+    })),
+  ];
 }
 
 export async function POST(request: Request) {
@@ -105,7 +118,7 @@ export async function POST(request: Request) {
     .join(" ");
   const matchedProducts = searchProducts(allProducts, recentUserQuery || latest, 4);
   const responseProducts = matchedProducts.map(clientProduct);
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({
@@ -116,53 +129,32 @@ export async function POST(request: Request) {
   }
 
   try {
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{
-              text: [
-                "You are Simba AI, the conversational product search assistant for Simba Supermarket Rwanda.",
-                "The application searches its catalog before asking you to respond.",
-                "Treat MATCHED_PRODUCTS_FROM_SIMBA_CATALOG as the complete and authoritative search result for the current request.",
-                "Only recommend products in that list. Never invent a product, price, stock status, seller, or promotion.",
-                "Use exact product names and prices from the list. Prefer available products.",
-                "If the list is empty for a product request, ask one short clarifying question instead of suggesting outside products.",
-                "For service questions: Track opens delivery status and ETA; checkout supports mobile money, card, and cash where available; branch selection controls availability.",
-                "Reply in friendly plain text without Markdown and stay under 90 words.",
-              ].join(" "),
-            }],
-          },
-          contents: geminiContents(messages, matchedProducts),
-          generationConfig: {
-            temperature: 0.25,
-            maxOutputTokens: 320,
-          },
-        }),
-        signal: AbortSignal.timeout(12_000),
+    const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        model,
+        messages: groqMessages(messages, matchedProducts),
+        temperature: 0.25,
+        max_completion_tokens: 320,
+      }),
+      signal: AbortSignal.timeout(12_000),
+    });
 
-    if (!response.ok) throw new Error(`Gemini returned ${response.status}`);
+    if (!response.ok) throw new Error(`Groq returned ${response.status}`);
     const data = await response.json() as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      choices?: Array<{ message?: { content?: string } }>;
     };
-    const reply = data.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text || "")
-      .join("")
-      .trim();
+    const reply = data.choices?.[0]?.message?.content?.trim();
 
     return NextResponse.json({
       reply: reply || localReply(latest, matchedProducts),
       products: responseProducts,
-      mode: reply ? "gemini" : "local",
+      mode: reply ? "groq" : "local",
     });
   } catch {
     return NextResponse.json({

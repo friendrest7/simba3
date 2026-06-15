@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { StoreProvider } from "@/components/store-provider";
 import { DeferredUtilities } from "@/components/deferred-utilities";
+import backgroundImage from "@/ogik.png";
 
 export const metadata: Metadata = {
   title: "Simba Marketplace | Shop the world with trust",
@@ -19,11 +20,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             __html: `try{const t=localStorage.getItem("simba-theme");document.documentElement.classList.toggle("dark",t==="dark")}catch{}`,
           }}
         />
+        <div
+          className="site-background"
+          style={{ backgroundImage: `url(${backgroundImage.src})` }}
+          aria-hidden="true"
+        />
         <StoreProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <DeferredUtilities />
+          <div className="site-shell">
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <DeferredUtilities />
+          </div>
         </StoreProvider>
       </body>
     </html>

@@ -16,6 +16,20 @@
 :root[data-accent="purple"] { --brand: 126 58 242; }
 :root[data-accent="amber"] { --brand: 217 119 6; }
 :root[data-accent="teal"] { --brand: 13 148 136; }
+:root[data-accent="orange"] { --brand: 234 88 12; }
+:root[data-accent="pink"] { --brand: 219 39 119; }
+:root[data-accent="rose"] { --brand: 244 63 94; }
+:root[data-accent="fuchsia"] { --brand: 192 38 211; }
+:root[data-accent="violet"] { --brand: 109 40 217; }
+:root[data-accent="indigo"] { --brand: 79 70 229; }
+:root[data-accent="cyan"] { --brand: 8 145 178; }
+:root[data-accent="sky"] { --brand: 2 132 199; }
+:root[data-accent="emerald"] { --brand: 5 150 105; }
+:root[data-accent="lime"] { --brand: 77 124 15; }
+:root[data-accent="yellow"] { --brand: 202 138 4; }
+:root[data-accent="brown"] { --brand: 146 64 14; }
+:root[data-accent="slate"] { --brand: 71 85 105; }
+:root[data-accent="black"] { --brand: 24 24 27; }
 
 .dark {
   --ink: 245 245 242;
@@ -32,6 +46,37 @@ body {
   background: rgb(var(--canvas));
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
+}
+
+.site-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition: filter .3s ease;
+}
+
+.site-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+.dark .site-background::after {
+  background: rgb(0 0 0 / .7);
+}
+
+.dark .site-background {
+  filter: brightness(.5) saturate(.65);
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
 }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -64,7 +109,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .input-icon { @apply absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted; }
   .dashboard-card { @apply border border-line bg-canvas p-5; border-radius: 6px; }
   .header-action {
-    @apply relative hidden min-w-14 flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px] font-bold text-ink transition hover:bg-black/5 dark:hover:bg-white/5 sm:flex;
+    @apply relative hidden min-w-14 flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px] font-bold text-white transition hover:bg-white/15 sm:flex;
   }
   .header-action svg { @apply h-5 w-5; }
   .action-count {

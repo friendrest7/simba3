@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Bot, ExternalLink, Loader2, MessageCircle, Send, Sparkles, X } from "lucide-react";
+import { Bot, Cpu, ExternalLink, Loader2, Send, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type ChatProduct = {
@@ -25,7 +25,7 @@ export function SimbaChat() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"gemini" | "local" | null>(null);
+  const [mode, setMode] = useState<"groq" | "local" | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -34,6 +34,7 @@ export function SimbaChat() {
   ]);
   const sendMessageRef = useRef<(text: string) => void>(() => undefined);
   const conversationEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return;
@@ -86,6 +87,25 @@ export function SimbaChat() {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (!chatRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
   const suggestions = [
     "Show me available Simba chips",
     "What can I buy under FRw 10,000?",
@@ -93,28 +113,28 @@ export function SimbaChat() {
   ];
 
   return (
-    <div className="fixed bottom-5 left-5 z-[80]">
+    <div ref={chatRef} className="fixed bottom-16 right-3 z-[80] flex flex-col items-end sm:right-4">
       {open && (
-        <section className="mb-3 flex h-[min(680px,calc(100vh-110px))] w-[min(410px,calc(100vw-24px))] flex-col overflow-hidden rounded-md border border-line bg-canvas shadow-2xl">
-          <header className="flex items-center justify-between bg-brand p-4 text-white">
+        <section className="mb-3 flex h-[min(520px,calc(100vh-180px))] w-[min(370px,calc(100vw-24px))] flex-col overflow-hidden rounded-xl border border-line bg-canvas shadow-2xl">
+          <header className="flex items-center justify-between bg-brand p-3 text-white">
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-brand"><Bot className="h-5 w-5" /></span>
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-brand"><Bot className="h-4 w-4" /></span>
               <div>
                 <p className="text-sm font-black">Simba AI</p>
                 <p className="mt-0.5 flex items-center gap-1 text-[10px] text-white/75">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#79e2ac]" />
-                  {mode === "gemini" ? "Powered by Gemini" : mode === "local" ? "Smart catalog mode" : "Ready to help"}
+                  {mode === "groq" ? "Powered by Groq" : mode === "local" ? "Smart catalog mode" : "Ready to help"}
                 </p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-md hover:bg-white/10" title="Close assistant"><X className="h-5 w-5" /></button>
           </header>
 
-          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          <div className="flex-1 space-y-3 overflow-y-auto p-3">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className="max-w-[92%]">
-                  <div className={`rounded-md px-4 py-3 text-sm leading-6 ${message.role === "user" ? "bg-[#3867d6] text-white" : "bg-black/[.055] text-ink dark:bg-white/10"}`}>
+                  <div className={`rounded-md px-3 py-2.5 text-xs leading-5 ${message.role === "user" ? "bg-[#3867d6] text-white" : "bg-black/[.055] text-ink dark:bg-white/10"}`}>
                     {message.content}
                   </div>
                   {!!message.products?.length && (
@@ -182,11 +202,23 @@ export function SimbaChat() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="relative flex h-14 items-center gap-3 rounded-full bg-[#16865c] px-5 font-black text-white shadow-[0_10px_28px_rgba(22,134,92,.35)] transition hover:-translate-y-1"
+        className="group relative flex min-h-12 items-center gap-2.5 overflow-hidden rounded-xl border border-brand/35 bg-[linear-gradient(115deg,#07151c,#10201f_55%,#171923)] px-2 pr-3.5 text-left text-white shadow-[0_8px_24px_rgba(0,0,0,.22)] transition duration-300 hover:-translate-y-0.5 hover:border-brand/70"
+        aria-label={open ? "Close Simba AI assistant" : "Open Simba AI shopping assistant"}
       >
-        {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-        <span className="text-sm">Ask Simba AI</span>
-        {!open && <Sparkles className="h-3.5 w-3.5 text-[#ffe176]" />}
+        <span className="absolute inset-y-0 left-0 w-0.5 bg-brand" />
+        <span className="relative ml-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/35 bg-brand text-white transition duration-300 group-hover:rotate-6 group-hover:scale-105">
+          <span className="absolute inset-1 rounded-md border border-white/20" />
+          {open ? <X className="relative h-4 w-4" /> : <Cpu className="relative h-4.5 w-4.5" />}
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[8px] font-bold uppercase tracking-[.12em] text-white/60">
+            {open ? "Assistant open" : "Need shopping help?"}
+          </span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-xs font-black">
+            {open ? "Close chat" : "Ask Simba AI"}
+            {!open && <Sparkles className="h-3 w-3 text-brand" />}
+          </span>
+        </span>
       </button>
     </div>
   );

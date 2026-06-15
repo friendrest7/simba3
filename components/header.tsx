@@ -62,12 +62,12 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-line/80 bg-canvas/95 shadow-sm backdrop-blur"
-      style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .12), 0 10px 24px rgb(0 0 0 / .04)" }}
+      className="sticky top-0 z-50 border-b border-brand/35 bg-brand text-white shadow-sm"
+      style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .4), 0 10px 24px rgb(0 0 0 / .12)" }}
     >
       <div
         className="mx-auto flex h-[74px] max-w-[1500px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8"
-        style={{ background: "linear-gradient(90deg, rgb(var(--brand) / .10), transparent 52%)" }}
+        style={{ background: "linear-gradient(90deg, rgb(0 0 0 / .14), transparent 52%, rgb(255 255 255 / .08))" }}
       >
         <Logo />
 
@@ -84,7 +84,7 @@ export function Header() {
           </button>
         </form>
 
-        <nav className="ml-auto flex items-center gap-1 sm:gap-2">
+        <nav className="ml-auto flex items-center gap-1 rounded-xl border border-white/25 bg-black/15 p-1.5 text-white backdrop-blur-sm sm:gap-2">
           <Link href={accountHref} className="header-action">
             <UserRound />
             <span>{user ? user.name.split(" ")[0] : t("account")}</span>
@@ -104,14 +104,14 @@ export function Header() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden h-11 items-center gap-2 rounded-full border border-line bg-canvas px-3 text-xs font-black text-ink transition hover:border-brand hover:text-brand lg:flex"
+            className="hidden h-11 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 text-xs font-black text-white transition hover:bg-white/20 lg:flex"
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             {theme === "light" ? t("darkMode") : t("lightMode")}
           </button>
           <button
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-line bg-canvas text-ink transition hover:border-brand hover:text-brand lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition hover:bg-white/20 lg:hidden"
             aria-label={t("menu")}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -119,30 +119,30 @@ export function Header() {
         </nav>
       </div>
 
-      <div className="hidden border-t border-line bg-black/[.025] dark:bg-white/[.025] lg:block">
+      <div className="hidden border-t border-white/20 bg-black/15 lg:block">
         <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-6 px-8 text-xs font-bold">
-          <Link href="/shop" className="text-brand">{t("allCategories")}</Link>
-          <Link href="/shop">{t("marketplace")}</Link>
-          <Link href="/promotions">{t("deals")}</Link>
-          <Link href="/dashboard/client">{t("track")}</Link>
-          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-muted">
-            <MapPin className="h-4 w-4 text-brand" />
-            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-ink outline-none">
+          <Link href="/shop" className="rounded-full bg-white px-3 py-1.5 text-brand">{t("allCategories")}</Link>
+          <Link href="/shop" className="text-white/90 hover:text-white">{t("marketplace")}</Link>
+          <Link href="/promotions" className="text-white/90 hover:text-white">{t("deals")}</Link>
+          <Link href="/dashboard/client" className="text-white/90 hover:text-white">{t("track")}</Link>
+          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-white/70">
+            <MapPin className="h-4 w-4 text-white" />
+            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-white outline-none [&>option]:text-black">
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
             </select>
           </label>
-          <label className="flex cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-muted">
-            <Languages className="h-4 w-4 text-brand" />
-            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="bg-transparent font-bold text-ink outline-none">
+          <label className="flex cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-white/70">
+            <Languages className="h-4 w-4 text-white" />
+            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="bg-transparent font-bold text-white outline-none [&>option]:text-black">
               {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
             </select>
           </label>
-          {user && <button onClick={handleSignOut} className="font-black text-brand">{t("signout")}</button>}
+          {user && <button onClick={handleSignOut} className="font-black text-white">{t("signout")}</button>}
         </div>
       </div>
 
       {menuOpen && (
-        <div className="border-t border-line bg-canvas p-4 lg:hidden" style={{ background: "linear-gradient(180deg, rgb(var(--brand) / .08), transparent 52%)" }}>
+        <div className="border-t border-white/20 bg-brand p-4 text-white lg:hidden">
           <form onSubmit={submitSearch} className="relative md:hidden">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("search")} className="form-input pl-11 pr-12" />
