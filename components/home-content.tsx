@@ -140,6 +140,9 @@ export function HomeContent({
               <Link href="/shop" className="button-primary !min-h-9 !px-3 !text-[10px]">{t("startShopping")} <ArrowRight className="h-3 w-3" /></Link>
               <Link href="/shop?category=Simba%20Favourites" className="button-secondary !min-h-9 !px-3 !text-[10px]">{t("seeFavourites")}</Link>
             </div>
+            <Link href="/signin" className="mt-2 inline-flex min-h-9 items-center justify-center rounded-md border border-brand px-4 text-[10px] font-black text-brand transition hover:bg-brand hover:text-white">
+              {t("signin")}
+            </Link>
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
               {[
                 ["789", t("productsReady")],

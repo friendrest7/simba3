@@ -23,7 +23,7 @@ const en = {
   signout: "Sign out",
   language: "Language",
   account: "Account",
-  wishlist: "Wishlist",
+  wishlist: "Favourites",
   compare: "Compare",
   cart: "Cart",
   menu: "Menu",

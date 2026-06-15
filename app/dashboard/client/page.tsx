@@ -134,7 +134,7 @@ export default function ClientDashboard() {
     <div className="mt-8 grid gap-4 sm:grid-cols-3">
       <StatCard icon={ShoppingBag} label="Total orders" value={String(orders.length)} trend={orders.length ? "Full purchase history" : "Your first order is waiting"} />
       <StatCard icon={Truck} label="Active deliveries" value={String(activeOrders.length)} trend="Realtime status enabled" />
-      <StatCard icon={Heart} label="Saved products" value={String(savedProductIds.length)} trend="Synced wishlist" />
+      <StatCard icon={Heart} label="Favourite products" value={String(savedProductIds.length)} trend="Synced favourites" />
     </div>
 
     {loading ? <div className="py-20 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-brand" /><p className="mt-3 text-sm text-gray-500">Loading order history...</p></div> : orders.length ? (

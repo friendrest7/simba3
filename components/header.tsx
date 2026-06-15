@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  GitCompareArrows,
-  Heart,
+  ChevronDown,
   Languages,
   MapPin,
   Menu,
@@ -24,6 +23,7 @@ import { cleanSearchQuery } from "@/lib/product-search";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [secondaryNavOpen, setSecondaryNavOpen] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = usePathname();
   const router = useRouter();
@@ -67,40 +67,37 @@ export function Header() {
     >
       <div
         className="mx-auto flex h-[74px] max-w-[1500px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8"
-        style={{ background: "linear-gradient(90deg, rgb(0 0 0 / .14), transparent 52%, rgb(255 255 255 / .08))" }}
       >
         <Logo />
 
         <form onSubmit={submitSearch} className="relative hidden min-w-0 flex-1 md:block">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/75" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("search")}
-            className="h-12 w-full rounded-lg border border-line bg-white pl-12 pr-28 text-sm text-[#171719] outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15 dark:bg-white/5 dark:text-white"
+            className="h-12 w-full rounded-lg border border-white/30 bg-white/10 pl-12 pr-28 text-sm text-white outline-none transition placeholder:text-white/70 focus:border-white/70 focus:ring-2 focus:ring-white/20"
           />
           <button className="absolute right-1.5 top-1.5 h-9 rounded-md bg-brand px-5 text-xs font-black text-white">
             {t("searchProducts")}
           </button>
         </form>
 
-        <nav className="ml-auto flex items-center gap-1 rounded-xl border border-white/25 bg-black/15 p-1.5 text-white backdrop-blur-sm sm:gap-2">
+        <nav className="ml-auto flex items-center gap-1 rounded-xl border border-white/30 bg-brand p-1.5 text-white sm:gap-2">
           <Link href={accountHref} className="header-action">
             <UserRound />
             <span>{user ? user.name.split(" ")[0] : t("account")}</span>
-          </Link>
-          <Link href="/shop?saved=true" className="header-action">
-            <span className="relative"><Heart />{!!savedProductIds.length && <b className="action-count">{savedProductIds.length}</b>}</span>
-            <span>{t("wishlist")}</span>
-          </Link>
-          <Link href="/shop" className="header-action hidden lg:flex">
-            <GitCompareArrows />
-            <span>{t("compare")}</span>
           </Link>
           <Link href="/cart" className="header-action">
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
           </Link>
+          <label className="hidden h-11 cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 text-white lg:flex">
+            <Languages className="h-4 w-4" />
+            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-24 bg-transparent text-xs font-black text-white outline-none [&>option]:text-black">
+              {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
+            </select>
+          </label>
           <button
             type="button"
             onClick={toggleTheme}
@@ -108,6 +105,15 @@ export function Header() {
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             {theme === "light" ? t("darkMode") : t("lightMode")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSecondaryNavOpen((value) => !value)}
+            className="hidden h-11 w-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition hover:bg-white/20 lg:grid"
+            aria-label={secondaryNavOpen ? "Hide secondary navigation" : "Show secondary navigation"}
+            aria-expanded={secondaryNavOpen}
+          >
+            <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${secondaryNavOpen ? "rotate-180" : ""}`} />
           </button>
           <button
             onClick={() => setMenuOpen((value) => !value)}
@@ -119,22 +125,20 @@ export function Header() {
         </nav>
       </div>
 
-      <div className="hidden border-t border-white/20 bg-black/15 lg:block">
+      <div className={`${secondaryNavOpen ? "hidden border-t border-white/25 bg-brand lg:block" : "hidden"}`}>
         <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-6 px-8 text-xs font-bold">
           <Link href="/shop" className="rounded-full bg-white px-3 py-1.5 text-brand">{t("allCategories")}</Link>
           <Link href="/shop" className="text-white/90 hover:text-white">{t("marketplace")}</Link>
           <Link href="/promotions" className="text-white/90 hover:text-white">{t("deals")}</Link>
           <Link href="/dashboard/client" className="text-white/90 hover:text-white">{t("track")}</Link>
+          <Link href="/shop?saved=true" className="text-white/90 hover:text-white">
+            {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded-full bg-white px-1.5 py-0.5 text-[9px] text-brand">{savedProductIds.length}</span>}
+          </Link>
+          <Link href="/shop" className="text-white/90 hover:text-white">{t("compare")}</Link>
           <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-white/70">
             <MapPin className="h-4 w-4 text-white" />
             <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-white outline-none [&>option]:text-black">
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
-            </select>
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-white/70">
-            <Languages className="h-4 w-4 text-white" />
-            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="bg-transparent font-bold text-white outline-none [&>option]:text-black">
-              {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
             </select>
           </label>
           {user && <button onClick={handleSignOut} className="font-black text-white">{t("signout")}</button>}
@@ -142,10 +146,15 @@ export function Header() {
       </div>
 
       {menuOpen && (
-        <div className="border-t border-white/20 bg-brand p-4 text-white lg:hidden">
+        <div className="border-t border-white/25 bg-brand p-4 text-white lg:hidden">
           <form onSubmit={submitSearch} className="relative md:hidden">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("search")} className="form-input pl-11 pr-12" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/75" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t("search")}
+              className="h-12 w-full rounded-md border border-white/30 bg-white/10 pl-11 pr-12 text-sm text-white outline-none placeholder:text-white/70 focus:border-white/70"
+            />
             <button className="absolute right-1.5 top-1.5 grid h-9 w-9 place-items-center rounded-md bg-brand text-white"><Search className="h-4 w-4" /></button>
           </form>
           <div className="mt-4 grid grid-cols-3 gap-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Palette, X } from "lucide-react";
+import { Check, Palette, RefreshCw, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Accent, useStore } from "./store-provider";
 
@@ -29,8 +29,27 @@ const colors: Array<{ name: Accent; label: string; hex: string }> = [
 
 export function ThemePanel() {
   const [open, setOpen] = useState(false);
+  const [cycling, setCycling] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const accentRef = useRef<Accent>("amber");
   const { accent, setAccent, t } = useStore();
+
+  useEffect(() => {
+    accentRef.current = accent;
+  }, [accent]);
+
+  useEffect(() => {
+    if (!cycling) return;
+
+    const interval = window.setInterval(() => {
+      const currentIndex = colors.findIndex((color) => color.name === accentRef.current);
+      const next = colors[(currentIndex + 1) % colors.length].name;
+      accentRef.current = next;
+      setAccent(next);
+    }, 1_500);
+
+    return () => window.clearInterval(interval);
+  }, [cycling, setAccent]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,11 +78,25 @@ export function ThemePanel() {
             <div><p className="text-xs font-black">{t("chooseColor")}</p><p className="mt-1 text-[10px] text-muted">{t("colorHelp")}</p></div>
             <button onClick={() => setOpen(false)} className="icon-button !h-8 !w-8" title={t("closeColors")}><X className="h-4 w-4" /></button>
           </div>
+          <button
+            type="button"
+            onClick={() => setCycling((value) => !value)}
+            className={`mt-4 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border text-xs font-black transition ${
+              cycling ? "border-brand bg-brand text-white" : "border-line hover:border-brand hover:text-brand"
+            }`}
+            aria-pressed={cycling}
+          >
+            <RefreshCw className={`h-4 w-4 ${cycling ? "animate-spin" : ""}`} />
+            {cycling ? "Stop colour cycle" : "Cycle all colours"}
+          </button>
           <div className="mt-4 grid grid-cols-5 gap-2">
             {colors.map((color) => (
               <button
                 key={color.name}
-                onClick={() => setAccent(color.name)}
+                onClick={() => {
+                  setCycling(false);
+                  setAccent(color.name);
+                }}
                 title={color.label}
                 aria-label={`Use ${color.label}`}
                 className={`relative grid aspect-square place-items-center rounded-xl border-2 transition hover:scale-105 ${accent === color.name ? "border-ink" : "border-transparent"}`}
@@ -77,11 +110,14 @@ export function ThemePanel() {
       )}
       <button
         onClick={() => setOpen(!open)}
-        className="grid h-10 w-10 place-items-center rounded-xl bg-brand text-white shadow-lg transition hover:scale-105"
+        className="grid h-12 w-12 place-items-center rounded-xl p-[3px] shadow-lg transition hover:scale-105"
+        style={{ background: "conic-gradient(#e11d2e,#ea580c,#ca8a04,#4d7c0f,#059669,#0891b2,#2563eb,#6d28d9,#db2777,#e11d2e)" }}
         title={t("changeColor")}
         aria-label={t("changeColor")}
       >
-        <Palette className="h-4 w-4" />
+        <span className="grid h-full w-full place-items-center rounded-[9px] bg-brand text-white">
+          <Palette className="h-4 w-4" />
+        </span>
       </button>
     </div>
   );

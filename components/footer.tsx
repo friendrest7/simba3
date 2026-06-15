@@ -43,7 +43,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#16171a] text-white">
+    <footer className="bg-brand text-white">
       <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-10">
         <div className="max-w-sm">
           <Logo inverse />
@@ -63,7 +63,7 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="border-t border-white/10 px-5 py-5 text-center text-xs text-white/45">&copy; 2026 Simba Supermarket.</div>
+      <div className="border-t border-white/20 px-5 py-5 text-center text-xs text-white/65">&copy; 2026 Simba Supermarket.</div>
     </footer>
   );
 }

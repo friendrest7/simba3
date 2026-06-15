@@ -262,7 +262,7 @@ export function ShopClient({
           ) : (
             <div className="py-24 text-center">
               <Search className="mx-auto h-10 w-10 text-muted" />
-              <h2 className="mt-4 text-xl font-black">{savedOnly ? "Your wishlist is empty" : t("noProducts")}</h2>
+              <h2 className="mt-4 text-xl font-black">{savedOnly ? "Your favourites are empty" : t("noProducts")}</h2>
               <p className="mt-2 text-sm text-muted">{savedOnly ? "Save products to find them here across your devices." : t("broadenSearch")}</p>
               {!savedOnly && <button type="button" onClick={clearFilters} className="button-primary mt-6">Reset catalog</button>}
             </div>

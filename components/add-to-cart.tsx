@@ -32,7 +32,7 @@ export function AddToCart({ product }: { product: Product }) {
         <button onClick={() => setQuantity(Math.min(branchStock, quantity + 1))} className="icon-button !h-8 !w-8"><Plus /></button>
       </div>
       {soldOut ? <button type="button" onClick={() => void notifyMe()} className="button-primary flex-1"><Bell className="h-4 w-4" /> Notify Me</button> : <button type="button" onClick={() => addToCart(product, quantity)} className="button-primary flex-1"><ShoppingBag className="h-4 w-4" /> Add to Cart · {branchStock} available</button>}
-      <button type="button" onClick={() => toggleSavedProduct(product.id)} className="button-secondary !px-4" aria-pressed={saved}><Heart className={`h-4 w-4 ${saved ? "fill-current text-brand" : ""}`} /><span className="sm:hidden">{saved ? "Saved" : "Wishlist"}</span></button>
+      <button type="button" onClick={() => toggleSavedProduct(product.id)} className="button-secondary !px-4" aria-pressed={saved}><Heart className={`h-4 w-4 ${saved ? "fill-current text-brand" : ""}`} /><span className="sm:hidden">{saved ? "Saved" : "Favourite"}</span></button>
     </div>
   );
 }

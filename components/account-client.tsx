@@ -133,7 +133,7 @@ export function AccountClient() {
 
       <div className="mt-7 grid gap-3 sm:grid-cols-3">
         <Link href="/cart" className="dashboard-card flex min-h-24 items-center gap-4"><ShoppingCart className="h-6 w-6 text-brand" /><div><b className="text-2xl">{cartCount}</b><p className="text-xs text-muted">items in saved cart</p></div></Link>
-        <Link href="/shop?saved=true" className="dashboard-card flex min-h-24 items-center gap-4"><Heart className="h-6 w-6 text-brand" /><div><b className="text-2xl">{savedProductIds.length}</b><p className="text-xs text-muted">wishlist products</p></div></Link>
+        <Link href="/shop?saved=true" className="dashboard-card flex min-h-24 items-center gap-4"><Heart className="h-6 w-6 text-brand" /><div><b className="text-2xl">{savedProductIds.length}</b><p className="text-xs text-muted">favourite products</p></div></Link>
         <Link href="/dashboard/client" className="dashboard-card flex min-h-24 items-center gap-4"><MapPin className="h-6 w-6 text-brand" /><div><b className="text-lg">Orders</b><p className="text-xs text-muted">history, tracking & buy again</p></div></Link>
       </div>
 
