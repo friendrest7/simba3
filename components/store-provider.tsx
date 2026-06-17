@@ -84,7 +84,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [accent, setAccentState] = useState<Accent>("amber");
+  const [accent, setAccentState] = useState<Accent>("yellow");
   const [currency, setCurrencyState] = useState<CurrencyCode>("RWF");
   const [selectedBranchId, setSelectedBranchIdState] = useState("kigali-kic");
   const [language, setLanguageState] = useState<LanguageCode>("en");

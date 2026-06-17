@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-h-screen bg-canvas text-ink">
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{const t=localStorage.getItem("simba-theme");document.documentElement.classList.toggle("dark",t==="dark")}catch{}`,
+            __html: `try{const t=localStorage.getItem("simba-theme");const a=localStorage.getItem("simba-accent")||"yellow";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.dataset.accent=a}catch{}`,
           }}
         />
         <div

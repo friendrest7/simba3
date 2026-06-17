@@ -21,7 +21,7 @@ const colors: Array<{ name: Accent; label: string; hex: string }> = [
   { name: "sky", label: "Sky blue", hex: "#0284c7" },
   { name: "emerald", label: "Emerald green", hex: "#059669" },
   { name: "lime", label: "Fresh lime", hex: "#4d7c0f" },
-  { name: "yellow", label: "Sun yellow", hex: "#ca8a04" },
+  { name: "yellow", label: "Simba orange", hex: "#FFA500" },
   { name: "brown", label: "Earth brown", hex: "#92400e" },
   { name: "slate", label: "Cool slate", hex: "#475569" },
   { name: "black", label: "Classic black", hex: "#18181b" },
@@ -31,7 +31,7 @@ export function ThemePanel() {
   const [open, setOpen] = useState(false);
   const [cycling, setCycling] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const accentRef = useRef<Accent>("amber");
+  const accentRef = useRef<Accent>("yellow");
   const { accent, setAccent, t } = useStore();
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function ThemePanel() {
       <button
         onClick={() => setOpen(!open)}
         className="grid h-12 w-12 place-items-center rounded-xl p-[3px] shadow-lg transition hover:scale-105"
-        style={{ background: "conic-gradient(#e11d2e,#ea580c,#ca8a04,#4d7c0f,#059669,#0891b2,#2563eb,#6d28d9,#db2777,#e11d2e)" }}
+        style={{ background: "conic-gradient(#e11d2e,#ea580c,#FFA500,#4d7c0f,#059669,#0891b2,#2563eb,#6d28d9,#db2777,#e11d2e)" }}
         title={t("changeColor")}
         aria-label={t("changeColor")}
       >
