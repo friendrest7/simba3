@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChevronDown,
+  Grid3X3,
   Languages,
   MapPin,
   Menu,
@@ -59,57 +60,67 @@ export function Header() {
 
   const accountHref = user ? (user.role === "client" ? "/account" : `/dashboard/${user.role}`) : `/signin?next=${encodeURIComponent(pathname)}`;
   const mobileSelectClass = "min-w-0 rounded-full border border-line bg-canvas px-3 py-2 text-[11px] font-black text-ink outline-none";
+  const accountLabel = user ? user.name.split(" ")[0] : t("account");
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-brand/35 bg-brand text-white shadow-sm"
-      style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .4), 0 10px 24px rgb(0 0 0 / .12)" }}
+      className="sticky top-0 z-50 border-b border-brand/25 bg-[#fff8eb] text-ink shadow-sm dark:bg-[#18130d] dark:text-white"
+      style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .35), 0 10px 24px rgb(0 0 0 / .14)" }}
     >
       <div
-        className="mx-auto flex h-[74px] max-w-[1500px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8"
+        className="mx-auto flex min-h-[76px] max-w-[1500px] items-center gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8"
       >
         <Logo />
 
+        <Link
+          href="/shop"
+          className="hidden h-12 shrink-0 items-center gap-2 rounded-md bg-brand px-4 text-sm font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
+        >
+          <Grid3X3 className="h-5 w-5" />
+          {t("allCategories")}
+        </Link>
+
         <form onSubmit={submitSearch} className="relative hidden min-w-0 flex-1 md:block">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/75" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/55" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("search")}
-            className="h-12 w-full rounded-lg border border-white/30 bg-white/10 pl-12 pr-28 text-sm text-white outline-none transition placeholder:text-white/70 focus:border-white/70 focus:ring-2 focus:ring-white/20"
+            className="h-12 w-full rounded-md border-2 border-brand bg-white pl-12 pr-32 text-sm font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
           />
-          <button className="absolute right-1.5 top-1.5 h-9 rounded-md bg-brand px-5 text-xs font-black text-white">
+          <button className="absolute right-1 top-1 h-10 rounded bg-brand px-5 text-xs font-black text-white transition hover:bg-brand/90">
             {t("searchProducts")}
           </button>
         </form>
 
-        <nav className="ml-auto flex items-center gap-1 rounded-xl border border-white/30 bg-brand p-1.5 text-white sm:gap-2">
-          <Link href={accountHref} className="header-action">
+        <nav className="ml-auto flex items-center gap-1 sm:gap-2">
+          <Link href={accountHref} className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
             <UserRound />
-            <span>{user ? user.name.split(" ")[0] : t("account")}</span>
+            <span>{accountLabel}</span>
           </Link>
-          <Link href="/cart" className="header-action">
+          <Link href="/cart" className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
           </Link>
-          <label className="hidden h-11 cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 text-white lg:flex">
-            <Languages className="h-4 w-4" />
-            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-24 bg-transparent text-xs font-black text-white outline-none [&>option]:text-black">
+          <label className="hidden h-10 cursor-pointer items-center gap-1.5 rounded-md border border-brand/25 bg-white px-2 text-ink xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white">
+            <Languages className="h-3.5 w-3.5" />
+            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-16 bg-transparent text-[10px] font-black text-ink outline-none dark:text-white [&>option]:text-black">
               {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
             </select>
           </label>
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden h-11 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 text-xs font-black text-white transition hover:bg-white/20 lg:flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
+            title={theme === "light" ? t("darkMode") : t("lightMode")}
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            {theme === "light" ? t("darkMode") : t("lightMode")}
           </button>
           <button
             type="button"
             onClick={() => setSecondaryNavOpen((value) => !value)}
-            className="hidden h-11 w-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition hover:bg-white/20 lg:grid"
+            className="hidden h-11 w-11 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:grid dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={secondaryNavOpen ? "Hide secondary navigation" : "Show secondary navigation"}
             aria-expanded={secondaryNavOpen}
           >
@@ -117,7 +128,7 @@ export function Header() {
           </button>
           <button
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition hover:bg-white/20 lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={t("menu")}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -125,35 +136,35 @@ export function Header() {
         </nav>
       </div>
 
-      <div className={`${secondaryNavOpen ? "hidden border-t border-white/25 bg-brand lg:block" : "hidden"}`}>
-        <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-6 px-8 text-xs font-bold">
-          <Link href="/shop" className="rounded-full bg-white px-3 py-1.5 text-brand">{t("allCategories")}</Link>
-          <Link href="/shop" className="text-white/90 hover:text-white">{t("marketplace")}</Link>
-          <Link href="/promotions" className="text-white/90 hover:text-white">{t("deals")}</Link>
-          <Link href="/dashboard/client" className="text-white/90 hover:text-white">{t("track")}</Link>
-          <Link href="/shop?saved=true" className="text-white/90 hover:text-white">
-            {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded-full bg-white px-1.5 py-0.5 text-[9px] text-brand">{savedProductIds.length}</span>}
+      <div className={`${secondaryNavOpen ? "hidden border-t border-brand/20 bg-white lg:block dark:border-white/15 dark:bg-[#231a10]" : "hidden"}`}>
+        <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-5 px-8 text-xs font-bold">
+          <Link href="/shop" className="flex items-center gap-2 rounded bg-white px-3 py-1.5 text-brand"><Grid3X3 className="h-3.5 w-3.5" />{t("allCategories")}</Link>
+          <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("marketplace")}</Link>
+          <Link href="/promotions" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("deals")}</Link>
+          <Link href="/dashboard/client" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("track")}</Link>
+          <Link href="/shop?saved=true" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">
+            {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded bg-brand px-1.5 py-0.5 text-[9px] text-white">{savedProductIds.length}</span>}
           </Link>
-          <Link href="/shop" className="text-white/90 hover:text-white">{t("compare")}</Link>
-          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-white/70">
-            <MapPin className="h-4 w-4 text-white" />
-            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-white outline-none [&>option]:text-black">
+          <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("compare")}</Link>
+          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded border border-brand/20 bg-brand/5 px-3 py-1.5 text-ink/75 dark:border-white/20 dark:bg-white/10 dark:text-white/80">
+            <MapPin className="h-4 w-4 text-brand dark:text-white" />
+            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-ink outline-none dark:text-white [&>option]:text-black">
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
             </select>
           </label>
-          {user && <button onClick={handleSignOut} className="font-black text-white">{t("signout")}</button>}
+          {user && <button onClick={handleSignOut} className="font-black text-ink dark:text-white">{t("signout")}</button>}
         </div>
       </div>
 
       {menuOpen && (
-        <div className="border-t border-white/25 bg-brand p-4 text-white lg:hidden">
+        <div className="border-t border-brand/20 bg-white p-4 text-ink dark:border-white/15 dark:bg-[#231a10] dark:text-white lg:hidden">
           <form onSubmit={submitSearch} className="relative md:hidden">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/75" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/55" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={t("search")}
-              className="h-12 w-full rounded-md border border-white/30 bg-white/10 pl-11 pr-12 text-sm text-white outline-none placeholder:text-white/70 focus:border-white/70"
+              className="h-12 w-full rounded-md border-2 border-brand bg-white pl-11 pr-12 text-sm font-semibold text-ink outline-none placeholder:text-muted focus:ring-4 focus:ring-brand/20"
             />
             <button className="absolute right-1.5 top-1.5 grid h-9 w-9 place-items-center rounded-md bg-brand text-white"><Search className="h-4 w-4" /></button>
           </form>
