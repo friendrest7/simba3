@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { cleanSearchQuery } from "@/lib/product-search";
@@ -58,6 +58,7 @@ export function HomeContent({
   const { t } = useStore();
   const [activeSlide, setActiveSlide] = useState(0);
   const [sliderPaused, setSliderPaused] = useState(false);
+  const activeHeroSlide = heroSlides[activeSlide];
 
   useEffect(() => {
     if (sliderPaused) return;
@@ -80,6 +81,14 @@ export function HomeContent({
     input.value = cleaned;
   }
 
+  function showPreviousSlide() {
+    setActiveSlide((current) => (current === 0 ? heroSlides.length - 1 : current - 1));
+  }
+
+  function showNextSlide() {
+    setActiveSlide((current) => (current + 1) % heroSlides.length);
+  }
+
   return (
     <div>
       <section
@@ -93,8 +102,13 @@ export function HomeContent({
       >
         <div className="mx-auto grid max-w-[1500px] items-start gap-7 px-5 pb-8 pt-5 sm:px-8 sm:pt-6 lg:grid-cols-[1.3fr_.7fr] lg:px-8 lg:pb-10 lg:pt-7">
           <div className="mx-auto w-full max-w-[620px] sm:max-w-[700px] lg:max-w-[820px]">
-            <div className="rounded-2xl bg-brand p-2 sm:p-3">
-              <div className="relative aspect-video overflow-hidden rounded-xl bg-brand">
+            <div className="relative rounded-2xl bg-brand p-2 sm:p-3">
+              <button
+                type="button"
+                onClick={showNextSlide}
+                className="group relative block aspect-video w-full overflow-hidden rounded-xl bg-brand text-left"
+                aria-label={`Show next landing image after ${activeHeroSlide.alt}`}
+              >
                 {heroSlides.map((slide, index) => (
                   <Image
                     key={slide.alt}
@@ -110,7 +124,26 @@ export function HomeContent({
                     sizes="(min-width: 1024px) 52vw, (min-width: 640px) 88vw, 94vw"
                   />
                 ))}
-              </div>
+                <span className="absolute bottom-3 left-3 rounded-full bg-black/70 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">
+                  Click image to slide
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={showPreviousSlide}
+                className="absolute left-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white shadow-sm backdrop-blur-sm transition hover:bg-brand sm:h-11 sm:w-11"
+                aria-label="Show previous landing image"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={showNextSlide}
+                className="absolute right-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white shadow-sm backdrop-blur-sm transition hover:bg-brand sm:h-11 sm:w-11"
+                aria-label="Show next landing image"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
             <div className="mx-auto mt-4 flex w-fit justify-center gap-2 rounded-full border border-white/60 bg-white/80 px-3 py-2 backdrop-blur-md dark:border-white/10 dark:bg-black/65" aria-label="Choose hero image">
               {heroSlides.map((slide, index) => (

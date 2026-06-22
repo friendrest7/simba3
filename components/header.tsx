@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChevronDown,
-  Grid3X3,
   Languages,
   MapPin,
   Menu,
@@ -74,9 +73,8 @@ export function Header() {
 
         <Link
           href="/shop"
-          className="hidden h-12 shrink-0 items-center gap-2 rounded-md bg-brand px-4 text-sm font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
+          className="hidden h-10 shrink-0 items-center rounded-md bg-brand px-3 text-xs font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
         >
-          <Grid3X3 className="h-5 w-5" />
           {t("allCategories")}
         </Link>
 
@@ -86,10 +84,13 @@ export function Header() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("search")}
-            className="h-12 w-full rounded-md border-2 border-brand bg-white pl-12 pr-32 text-sm font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
+            className="h-12 w-full rounded-md border-2 border-brand bg-white pl-12 pr-14 text-sm font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
           />
-          <button className="absolute right-1 top-1 h-10 rounded bg-brand px-5 text-xs font-black text-white transition hover:bg-brand/90">
-            {t("searchProducts")}
+          <button
+            className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md bg-brand text-white shadow-sm transition hover:bg-brand/90"
+            aria-label={t("searchProducts")}
+          >
+            <Search className="h-4 w-4" />
           </button>
         </form>
 
@@ -138,7 +139,7 @@ export function Header() {
 
       <div className={`${secondaryNavOpen ? "hidden border-t border-brand/20 bg-white lg:block dark:border-white/15 dark:bg-[#231a10]" : "hidden"}`}>
         <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-5 px-8 text-xs font-bold">
-          <Link href="/shop" className="flex items-center gap-2 rounded bg-white px-3 py-1.5 text-brand"><Grid3X3 className="h-3.5 w-3.5" />{t("allCategories")}</Link>
+          <Link href="/shop" className="rounded bg-white px-2.5 py-1 text-[11px] text-brand">{t("allCategories")}</Link>
           <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("marketplace")}</Link>
           <Link href="/promotions" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("deals")}</Link>
           <Link href="/dashboard/client" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("track")}</Link>
