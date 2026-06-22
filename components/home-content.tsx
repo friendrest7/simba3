@@ -125,7 +125,7 @@ export function HomeContent({
                   />
                 ))}
                 <span className="absolute bottom-3 left-3 rounded-full bg-black/70 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">
-                  Click image to slide
+                  {t("clickImageToSlide")}
                 </span>
               </button>
               <button
