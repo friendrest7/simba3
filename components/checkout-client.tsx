@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import {
   Banknote,
-  CheckCircle2,
   Clock3,
   Loader2,
   LockKeyhole,
@@ -18,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { branches } from "@/lib/data";
 import { deliveryTimeSlots, getDeliveryQuote, kigaliDistricts } from "@/lib/delivery";
 import { useStore } from "./store-provider";
+import { OrderInvoice } from "./order-invoice";
 
 type PaymentProvider = "mtn_momo" | "airtel_money" | "cash";
 type FulfilmentMethod = "delivery" | "pickup";
@@ -44,6 +44,7 @@ type CheckoutResult = {
   deliveryFeeRwf: number;
   estimatedDeliveryAt: string;
   demoPayment?: boolean;
+  items: Array<{ name: string; quantity: number; price: number }>;
 };
 
 const rwf = new Intl.NumberFormat("en-RW", { style: "currency", currency: "RWF", maximumFractionDigits: 0 });
@@ -126,6 +127,15 @@ export function CheckoutClient() {
   async function placeOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+
+    if (subtotalRwf < 2500) {
+      return setError("Minimum order amount is 2,500 RWF. Please add more items to your basket.");
+    }
+
+    if (!/^\+2507[2389]\d{7}$/.test(phone)) {
+      return setError("Please enter a valid Rwandan phone number (e.g., +250788123456).");
+    }
+
     if (!cart.length) return;
     setPlacingOrder(true);
     const response = await fetch("/api/checkout", {
@@ -155,19 +165,7 @@ export function CheckoutClient() {
   if (authLoading || !user) return <div className="min-h-[70vh] py-24 text-center text-sm text-muted">{t("protectedRoute")}</div>;
 
   if (result?.orderStatus === "confirmed") {
-    return (
-      <div className="mx-auto min-h-[70vh] max-w-xl px-4 py-20 text-center">
-        <CheckCircle2 className="mx-auto h-16 w-16 text-[#16865c]" />
-        <span className="eyebrow mt-6 inline-block">{t("orderConfirmed")}</span>
-        <h1 className="mt-3 text-4xl font-black">Order {result.orderNumber}</h1>
-        <p className="mt-4 leading-7 text-muted">
-          {paymentProvider === "cash" ? "Your cash order is confirmed." : `${paymentProvider === "mtn_momo" ? "MTN MoMo" : "Airtel Money"} payment confirmed.`}
-          {" "}Estimated fulfilment: {new Date(result.estimatedDeliveryAt).toLocaleString("en-RW")}.
-        </p>
-        {result.providerReference && <p className="mt-3 rounded-md bg-black/[.04] p-3 font-mono text-xs dark:bg-white/[.06]">Transaction: {result.providerReference}</p>}
-        <button type="button" onClick={() => router.push("/dashboard/client")} className="button-primary mt-7">Track this order</button>
-      </div>
-    );
+    return <OrderInvoice result={result} user={user!} />;
   }
 
   if (result && paymentChecking) {
@@ -207,8 +205,8 @@ export function CheckoutClient() {
                   <div><label className="form-label">Kigali district</label><select required value={district} onChange={(event) => setDistrict(event.target.value)} className="form-input">{kigaliDistricts.map((item) => <option key={item}>{item}</option>)}</select></div>
                   <div><label className="form-label">Preferred time</label><select required value={deliverySlot} onChange={(event) => setDeliverySlot(event.target.value as typeof deliverySlot)} className="form-input">{deliveryTimeSlots.map((slot) => <option key={slot}>{slot}</option>)}</select></div>
                   <div className="sm:col-span-2"><label className="form-label">Street, sector, or village</label><div className="relative"><MapPin className="input-icon" /><input required value={address} onChange={(event) => setAddress(event.target.value)} className="form-input pl-11" placeholder="KG 11 Ave, Kimihurura" /></div></div>
-                  <div><label className="form-label">Nearby landmark</label><input value={landmark} onChange={(event) => setLandmark(event.target.value)} className="form-input" placeholder="Optional" /></div>
-                  <div><label className="form-label">Delivery instructions</label><input value={instructions} onChange={(event) => setInstructions(event.target.value)} className="form-input" placeholder="Gate, floor, call on arrival..." /></div>
+                  <div><label className="form-label">Nearby landmark</label><textarea value={landmark} onChange={(event) => setLandmark(event.target.value)} className="form-input" placeholder="Optional" rows={1} /></div>
+                  <div><label className="form-label">Delivery instructions</label><textarea value={instructions} onChange={(event) => setInstructions(event.target.value)} className="form-input" placeholder="Gate, floor, call on arrival..." rows={2} /></div>
                 </div>
               </div>
             )}
@@ -222,7 +220,7 @@ export function CheckoutClient() {
               <button type="button" onClick={() => setPaymentProvider("airtel_money")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "airtel_money" ? "border-red-500 bg-red-500/10" : "border-line"}`}><Smartphone className="h-5 w-5 text-red-600" /><b className="mt-3 block text-sm">Airtel Money</b><small className="text-muted">Phone approval</small></button>
               <button type="button" onClick={() => setPaymentProvider("cash")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "cash" ? "border-[#16865c] bg-[#16865c]/10" : "border-line"}`}><Banknote className="h-5 w-5 text-[#16865c]" /><b className="mt-3 block text-sm">Cash</b><small className="text-muted">Pay on fulfilment</small></button>
             </div>
-            <div className="mt-5"><label className="form-label">Rwandan phone number</label><div className="relative"><Phone className="input-icon" /><input required type="tel" pattern="\+2507[2389][0-9]{7}" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="+250788123456" /></div></div>
+            <div><label className="form-label">Rwandan phone number</label><div className="relative"><Phone className="input-icon" /><input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="+250788123456" /></div></div>
           </section>
 
           {error && <p role="alert" className="rounded-md border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{error}</p>}
@@ -241,6 +239,16 @@ export function CheckoutClient() {
             <p className="flex items-center gap-2 font-black text-brand"><Clock3 className="h-4 w-4" /> Estimated fulfilment</p>
             <p className="mt-1 text-muted">{estimatedPreview}{fulfilment === "delivery" ? ` · ${deliverySlot}` : ""}</p>
           </div>
+          {(landmark || instructions) && (
+            <div className="mt-4 space-y-2 border-t border-line pt-4 text-xs text-muted">
+              {landmark && (
+                <p><span className="font-bold text-ink">Landmark:</span> {landmark}</p>
+              )}
+              {instructions && (
+                <p><span className="font-bold text-ink">Instructions:</span> {instructions}</p>
+              )}
+            </div>
+          )}
         </aside>
       </div>
     </div>

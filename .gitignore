@@ -7,3 +7,4 @@ out
 
 .vercel
 reports/tmp/
+.aider*

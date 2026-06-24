@@ -9,6 +9,7 @@ import { cleanSearchQuery } from "@/lib/product-search";
 import { useStore } from "@/components/store-provider";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/data";
+import { FAQAccordion } from "@/components/faq-accordion";
 import happyShopperImage from "@/landing/happy-shopper.jpg";
 import applesImage from "@/landing/pixabay-apples.jpg";
 import beveragesImage from "@/landing/pixabay-beverages.jpg";
@@ -260,6 +261,30 @@ export function HomeContent({
           </div>
         </div>
       </section>
+
+      <FAQAccordion
+        sections={[
+          {
+            title: "Delivery",
+            items: [
+              { question: "How long does delivery take?", answer: "Typical delivery is within 30-45 minutes in Kigali districts." },
+              { question: "Do you deliver outside Kigali?", answer: "Currently, we focus on Kigali and surrounding areas for rapid freshness." },
+            ],
+          },
+          {
+            title: "Returns",
+            items: [
+              { question: "What is your return policy?", answer: "For non-perishable items, returns are accepted within 7 days. For fresh produce, please contact us immediately upon delivery." },
+            ],
+          },
+          {
+            title: "Holidays",
+            items: [
+              { question: "Do you deliver on holidays?", answer: "We operate on most public holidays, but service times may vary. Check the app for real-time availability." },
+            ],
+          },
+        ]}
+      />
     </div>
   );
 }

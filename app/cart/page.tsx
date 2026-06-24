@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/product-card";
 import { allProducts } from "@/lib/catalog-products";
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, t } = useStore();
+  const { cart, updateQuantity, removeFromCart, clearCart, t } = useStore();
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;
   const cartIds = new Set(cart.map((item) => item.product.id));
@@ -65,6 +65,12 @@ export default function CartPage() {
             </div>
             <Link href="/checkout" className="button-primary mt-6 w-full">{t("checkout")} <ArrowRight className="h-4 w-4" /></Link>
             <Link href="/shop" className="mt-4 block text-center text-xs font-bold text-muted hover:text-brand">{t("continueShopping")}</Link>
+            <button
+              onClick={() => { if (window.confirm("Clear your entire basket?")) clearCart(); }}
+              className="mt-4 block w-full text-center text-xs font-bold text-muted hover:text-brand"
+            >
+              Clear cart
+            </button>
           </aside>
         </div>
       )}

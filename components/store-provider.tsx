@@ -15,6 +15,21 @@ export type User = {
   branchId?: string;
   driverId?: string;
 };
+
+export type CheckoutResult = {
+  orderId: string;
+  orderNumber: string;
+  paymentId?: string;
+  providerReference?: string;
+  paymentStatus: string;
+  orderStatus: string;
+  totalRwf: number;
+  deliveryFeeRwf: number;
+  estimatedDeliveryAt: string;
+  demoPayment?: boolean;
+  items: Array<{ name: string; quantity: number; price: number }>;
+};
+
 export type Accent =
   | "red"
   | "green"

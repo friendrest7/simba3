@@ -53,6 +53,11 @@ export async function POST(request: Request) {
   const subtotalRwf = items.reduce((sum, item) => sum + Math.round(item.product.price * 1450) * item.quantity, 0);
   const quote = getDeliveryQuote(district, fulfilment, subtotalRwf);
   const totalRwf = subtotalRwf + quote.feeRwf;
+
+  if (totalRwf < 2500) {
+    return NextResponse.json({ error: "Minimum order amount is 2,500 RWF." }, { status: 400 });
+  }
+
   const estimatedAt = estimatedDeliveryDate(quote.estimatedHours);
   const deliveryAddress = {
     fulfilment,
@@ -121,6 +126,7 @@ export async function POST(request: Request) {
       totalRwf,
       deliveryFeeRwf: quote.feeRwf,
       estimatedDeliveryAt: estimatedAt,
+      items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
     }, { status: 201 });
   }
 
@@ -157,6 +163,7 @@ export async function POST(request: Request) {
       deliveryFeeRwf: quote.feeRwf,
       estimatedDeliveryAt: estimatedAt,
       demoPayment: payment.demo,
+      items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
     }, { status: 201 });
   } catch (paymentError) {
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
