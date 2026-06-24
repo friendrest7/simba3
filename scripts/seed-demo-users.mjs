@@ -42,6 +42,34 @@ const demoAccounts = [
     phone: "+250788000102",
     role: "admin",
   },
+  {
+    email: "driver@simba.market",
+    password: "simba123",
+    fullName: "Demo Driver",
+    phone: "+250788000103",
+    role: "driver",
+  },
+  {
+    email: "manager@simba.market",
+    password: "simba123",
+    fullName: "Demo Branch Manager",
+    phone: "+250788000104",
+    role: "manager",
+  },
+  {
+    email: "admin@simba.market",
+    password: "simba123",
+    fullName: "Head Office Admin",
+    phone: "+250788000105",
+    role: "admin",
+  },
+  {
+    email: "ceo@simba.market",
+    password: "simba123",
+    fullName: "Chief Executive Officer",
+    phone: "+250788000106",
+    role: "ceo",
+  },
 ];
 
 async function findUserByEmail(email) {

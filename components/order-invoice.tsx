@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, Printer } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, Printer, PackageSearch } from "lucide-react";
 import { CheckoutResult, User } from "./store-provider";
 
 type InvoiceItem = {
@@ -75,31 +76,37 @@ export function OrderInvoice({ result, user }: OrderInvoiceProps) {
                   <td className="py-3 text-right font-bold">{rwf.format(item.price * item.quantity)}</td>
                 </tr>
               ))}
-              </tbody>
-              </table>
-              </div>
+            </tbody>
+          </table>
+        </div>
 
-              <div className="mt-8 space-y-3 border-t border-line pt-6 text-sm">
-              <div className="flex justify-between">
-              <span className="text-muted">Subtotal</span>
-              <span>{rwf.format(result.items.reduce((sum: number, i) => sum + i.price * i.quantity, 0))}</span>
-              </div>
-              <div className="flex justify-between">
-              <span className="text-muted">Delivery Fee</span>
-              <span>{rwf.format(result.deliveryFeeRwf)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-black text-ink">
-              <span>Total Amount</span>
-              <span>{rwf.format(result.totalRwf)}</span>
-              </div>
-              </div>
+        <div className="mt-8 space-y-3 border-t border-line pt-6 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted">Subtotal</span>
+            <span>{rwf.format(result.items.reduce((sum: number, i) => sum + i.price * i.quantity, 0))}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Delivery Fee</span>
+            <span>{rwf.format(result.deliveryFeeRwf)}</span>
+          </div>
+          <div className="flex justify-between text-lg font-black text-ink">
+            <span>Total Amount</span>
+            <span>{rwf.format(result.totalRwf)}</span>
+          </div>
+        </div>
 
         <div className="mt-8 rounded-lg bg-brand/5 p-4 text-xs">
           <p className="font-bold text-brand">Thank you for shopping with Simba!</p>
           <p className="mt-1 text-muted">If you have any questions, please contact our support team.</p>
         </div>
 
-        <div className="mt-8 flex justify-center no-print">
+        <div className="mt-8 flex justify-center gap-3 no-print">
+          <Link
+            href="/dashboard/client"
+            className="flex items-center gap-2 rounded-full border border-brand px-6 py-2 text-sm font-black text-brand transition hover:bg-brand/5"
+          >
+            <PackageSearch className="h-4 w-4" /> Track Order
+          </Link>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 rounded-full bg-brand px-6 py-2 text-sm font-black text-white transition hover:opacity-90"
