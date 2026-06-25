@@ -7,6 +7,7 @@ import {
   Loader2,
   LockKeyhole,
   MapPin,
+  Navigation,
   Phone,
   ShieldCheck,
   Smartphone,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { branches } from "@/lib/data";
-import { deliveryTimeSlots, getDeliveryQuote, kigaliDistricts } from "@/lib/delivery";
+import { deliveryTimeSlots, distanceBasedFee, distanceEstimatedHours, haversineKm } from "@/lib/delivery";
 import { useStore } from "./store-provider";
 import { OrderInvoice } from "./order-invoice";
 
@@ -54,7 +55,6 @@ export function CheckoutClient() {
   const router = useRouter();
   const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>("mtn_momo");
   const [fulfilment, setFulfilment] = useState<FulfilmentMethod>("delivery");
-  const [district, setDistrict] = useState("Nyarugenge");
   const [deliverySlot, setDeliverySlot] = useState(deliveryTimeSlots[0]);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -65,14 +65,34 @@ export function CheckoutClient() {
   const [paymentChecking, setPaymentChecking] = useState(false);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [error, setError] = useState("");
+  // Distance-based delivery
+  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "ok" | "denied">("idle");
+  const [clientCoords, setClientCoords] = useState<{ lat: number; lng: number } | null>(null);
   const selectedBranch = branches.find((branch) => branch.id === selectedBranchId) || branches[0];
   const subtotalRwf = cart.reduce((sum, item) => sum + Math.round(item.product.price * 1450) * item.quantity, 0);
-  const quote = getDeliveryQuote(district, fulfilment, subtotalRwf);
-  const totalRwf = subtotalRwf + quote.feeRwf;
+
+  const distanceKm = useMemo(() => {
+    if (!clientCoords || fulfilment === "pickup") return null;
+    return haversineKm(clientCoords.lat, clientCoords.lng, selectedBranch.coordinates.lat, selectedBranch.coordinates.lng);
+  }, [clientCoords, selectedBranch, fulfilment]);
+
+  const feeRwf = fulfilment === "pickup" ? 0 : distanceKm != null ? distanceBasedFee(distanceKm, subtotalRwf) : null;
+  const estimatedHours = fulfilment === "pickup" ? 2 : distanceKm != null ? distanceEstimatedHours(distanceKm) : 5;
+  const totalRwf = subtotalRwf + (feeRwf ?? 0);
   const estimatedPreview = useMemo(
-    () => new Intl.DateTimeFormat("en-RW", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + quote.estimatedHours * 3_600_000)),
-    [quote.estimatedHours],
+    () => new Intl.DateTimeFormat("en-RW", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + estimatedHours * 3_600_000)),
+    [estimatedHours],
   );
+
+  function detectLocation() {
+    if (!navigator.geolocation) { setGeoStatus("denied"); return; }
+    setGeoStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setClientCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setGeoStatus("ok"); },
+      () => setGeoStatus("denied"),
+      { timeout: 10_000 },
+    );
+  }
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/signin?next=/checkout");
@@ -94,7 +114,6 @@ export function CheckoutClient() {
   }, [user]);
 
   function chooseSavedAddress(saved: Address) {
-    setDistrict(saved.district);
     setPhone(saved.phone);
     setAddress(`${saved.street_address}${saved.sector ? `, ${saved.sector}` : ""}`);
     setLandmark(saved.landmark || "");
@@ -136,6 +155,10 @@ export function CheckoutClient() {
       return setError("Please enter a valid Rwandan phone number (e.g., +250788123456).");
     }
 
+    if (fulfilment === "delivery" && !clientCoords) {
+      return setError("Please use 'Detect my location' so we can calculate the exact delivery fee.");
+    }
+
     if (!cart.length) return;
     setPlacingOrder(true);
     const response = await fetch("/api/checkout", {
@@ -145,7 +168,8 @@ export function CheckoutClient() {
         items: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
         fulfilment,
         branchId: selectedBranchId,
-        district,
+        clientLat: clientCoords?.lat,
+        clientLng: clientCoords?.lng,
         address,
         landmark,
         instructions,
@@ -200,10 +224,36 @@ export function CheckoutClient() {
               <div className="mt-5"><label className="form-label">Collection branch</label><select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="form-input">{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}</select><p className="mt-2 text-xs text-muted">{selectedBranch.address}</p></div>
             ) : (
               <div className="mt-5 space-y-4">
+                {/* Geolocation */}
+                <div className="rounded-lg border border-line bg-canvas p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-bold">Your delivery location</p>
+                      {geoStatus === "ok" && distanceKm != null ? (
+                        <p className="mt-1 text-xs text-[#16865c] font-bold">
+                          {distanceKm.toFixed(1)} km from {selectedBranch.name} · Fee: {rwf.format(feeRwf!)}
+                        </p>
+                      ) : geoStatus === "denied" ? (
+                        <p className="mt-1 text-xs text-red-600">Location denied — enter address manually below.</p>
+                      ) : (
+                        <p className="mt-1 text-xs text-muted">We use your GPS to calculate an exact, fair fee.</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={detectLocation}
+                      disabled={geoStatus === "loading"}
+                      className="flex shrink-0 items-center gap-2 rounded-md bg-brand px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+                    >
+                      {geoStatus === "loading" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Navigation className="h-3 w-3" />}
+                      {geoStatus === "ok" ? "Re-detect" : "Detect my location"}
+                    </button>
+                  </div>
+                </div>
+
                 {addresses.length > 0 && <div><label className="form-label">Saved address</label><select defaultValue="" onChange={(event) => { const saved = addresses.find((item) => item.id === event.target.value); if (saved) chooseSavedAddress(saved); }} className="form-input"><option value="">Enter an address or choose saved</option>{addresses.map((item) => <option key={item.id} value={item.id}>{item.label} - {item.street_address}, {item.district}</option>)}</select></div>}
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><label className="form-label">Kigali district</label><select required value={district} onChange={(event) => setDistrict(event.target.value)} className="form-input">{kigaliDistricts.map((item) => <option key={item}>{item}</option>)}</select></div>
-                  <div><label className="form-label">Preferred time</label><select required value={deliverySlot} onChange={(event) => setDeliverySlot(event.target.value as typeof deliverySlot)} className="form-input">{deliveryTimeSlots.map((slot) => <option key={slot}>{slot}</option>)}</select></div>
+                  <div><label className="form-label">Preferred time</label><select required value={deliverySlot} onChange={(event) => setDeliverySlot(event.target.value as typeof deliverySlot)} className="form-input sm:col-span-2">{deliveryTimeSlots.map((slot) => <option key={slot}>{slot}</option>)}</select></div>
                   <div className="sm:col-span-2"><label className="form-label">Street, sector, or village</label><div className="relative"><MapPin className="input-icon" /><input required value={address} onChange={(event) => setAddress(event.target.value)} className="form-input pl-11" placeholder="KG 11 Ave, Kimihurura" /></div></div>
                   <div><label className="form-label">Nearby landmark</label><textarea value={landmark} onChange={(event) => setLandmark(event.target.value)} className="form-input" placeholder="Optional" rows={1} /></div>
                   <div><label className="form-label">Delivery instructions</label><textarea value={instructions} onChange={(event) => setInstructions(event.target.value)} className="form-input" placeholder="Gate, floor, call on arrival..." rows={2} /></div>
@@ -232,8 +282,8 @@ export function CheckoutClient() {
           <div className="mt-5 max-h-64 space-y-3 overflow-y-auto pr-1">{cart.map(({ product, quantity }) => <div key={product.id} className="flex justify-between gap-4 text-xs"><span className="text-muted">{quantity} × {product.name}</span><span className="shrink-0 font-bold">{rwf.format(Math.round(product.price * 1450) * quantity)}</span></div>)}</div>
           <div className="mt-5 space-y-3 border-t border-line pt-5 text-sm">
             <div className="flex justify-between"><span className="text-muted">Subtotal</span><span>{rwf.format(subtotalRwf)}</span></div>
-            <div className="flex justify-between"><span className="text-muted">Delivery · {quote.zone}</span><span>{quote.feeRwf ? rwf.format(quote.feeRwf) : "Free"}</span></div>
-            <div className="flex justify-between text-lg font-black"><span>Total</span><span>{rwf.format(totalRwf)}</span></div>
+            <div className="flex justify-between"><span className="text-muted">Delivery{distanceKm != null ? ` · ${distanceKm.toFixed(1)} km` : ""}</span><span>{feeRwf == null ? <span className="text-muted text-xs">detect location</span> : feeRwf === 0 ? "Free" : rwf.format(feeRwf)}</span></div>
+            <div className="flex justify-between text-lg font-black"><span>Total</span><span>{feeRwf == null && fulfilment === "delivery" ? <span className="text-sm text-muted">+ delivery</span> : rwf.format(totalRwf)}</span></div>
           </div>
           <div className="mt-5 rounded-lg bg-brand/5 p-4 text-xs leading-5">
             <p className="flex items-center gap-2 font-black text-brand"><Clock3 className="h-4 w-4" /> Estimated fulfilment</p>

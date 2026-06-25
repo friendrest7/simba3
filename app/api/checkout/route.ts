@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { allProducts } from "@/lib/catalog-products";
-import { estimatedDeliveryDate, getDeliveryQuote, kigaliDistricts } from "@/lib/delivery";
+import { branches } from "@/lib/data";
+import { distanceBasedFee, distanceEstimatedHours, estimatedDeliveryDate, haversineKm } from "@/lib/delivery";
 import { requestMobileMoneyPayment, type MobileMoneyProvider } from "@/lib/payments/mobile-money";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +9,8 @@ type CheckoutBody = {
   items?: Array<{ productId?: unknown; quantity?: unknown }>;
   fulfilment?: unknown;
   branchId?: unknown;
-  district?: unknown;
+  clientLat?: unknown;
+  clientLng?: unknown;
   address?: unknown;
   landmark?: unknown;
   instructions?: unknown;
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
   if (!items.length) return NextResponse.json({ error: "Your cart does not contain valid products." }, { status: 400 });
 
   const fulfilment = body?.fulfilment === "pickup" ? "pickup" : "delivery";
-  const district = text(body?.district, 50);
+  const branchId = text(body?.branchId, 100);
   const phone = text(body?.phone, 30).replace(/\s/g, "");
   const paymentProvider = body?.paymentProvider === "mtn_momo" || body?.paymentProvider === "airtel_money"
     ? body.paymentProvider
@@ -46,28 +48,33 @@ export async function POST(request: Request) {
   if (!paymentProvider || !/^\+2507[2389]\d{7}$/.test(phone)) {
     return NextResponse.json({ error: "Choose a payment method and enter a valid Rwandan phone number." }, { status: 400 });
   }
-  if (fulfilment === "delivery" && !kigaliDistricts.includes(district as never)) {
-    return NextResponse.json({ error: "Choose a supported Kigali district." }, { status: 400 });
+
+  // Distance-based fee
+  const branch = branches.find((b) => b.id === branchId) || branches[0];
+  let feeRwf = 0;
+  let estimatedHours = 2;
+  if (fulfilment === "delivery") {
+    const clientLat = typeof body?.clientLat === "number" ? body.clientLat : null;
+    const clientLng = typeof body?.clientLng === "number" ? body.clientLng : null;
+    if (clientLat == null || clientLng == null) {
+      return NextResponse.json({ error: "Location coordinates are required for delivery fee calculation." }, { status: 400 });
+    }
+    const distanceKm = haversineKm(clientLat, clientLng, branch.coordinates.lat, branch.coordinates.lng);
+    const subtotalForFee = items.reduce((sum, item) => sum + Math.round(item.product.price * 1450) * item.quantity, 0);
+    feeRwf = distanceBasedFee(distanceKm, subtotalForFee);
+    estimatedHours = distanceEstimatedHours(distanceKm);
   }
 
   const subtotalRwf = items.reduce((sum, item) => sum + Math.round(item.product.price * 1450) * item.quantity, 0);
-  const quote = getDeliveryQuote(district, fulfilment, subtotalRwf);
-  const totalRwf = subtotalRwf + quote.feeRwf;
-
-  if (totalRwf < 2500) {
-    return NextResponse.json({ error: "Minimum order amount is 2,500 RWF." }, { status: 400 });
-  }
-
-  const estimatedAt = estimatedDeliveryDate(quote.estimatedHours);
+  const totalRwf = subtotalRwf + feeRwf;
+  const estimatedAt = estimatedDeliveryDate(estimatedHours);
   const deliveryAddress = {
     fulfilment,
-    district: fulfilment === "delivery" ? district : null,
     address: text(body?.address, 250),
     landmark: text(body?.landmark, 200),
     instructions: text(body?.instructions, 500),
     phone,
     slot: text(body?.deliverySlot, 50),
-    zone: quote.zone,
   };
 
   const orderPayload = {
@@ -75,7 +82,7 @@ export async function POST(request: Request) {
     branch_id: text(body?.branchId, 100) || null,
     status: paymentProvider === "cash" ? "confirmed" : "pending",
     subtotal_rwf: subtotalRwf,
-    delivery_fee_rwf: quote.feeRwf,
+    delivery_fee_rwf: feeRwf,
     total_rwf: totalRwf,
     delivery_address: deliveryAddress,
     payment_method: paymentProvider,
@@ -124,7 +131,7 @@ export async function POST(request: Request) {
       paymentStatus: "pending",
       orderStatus: "confirmed",
       totalRwf,
-      deliveryFeeRwf: quote.feeRwf,
+      deliveryFeeRwf: feeRwf,
       estimatedDeliveryAt: estimatedAt,
       items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
     }, { status: 201 });
@@ -160,7 +167,7 @@ export async function POST(request: Request) {
       paymentStatus: payment.status,
       orderStatus: "pending",
       totalRwf,
-      deliveryFeeRwf: quote.feeRwf,
+      deliveryFeeRwf: feeRwf,
       estimatedDeliveryAt: estimatedAt,
       demoPayment: payment.demo,
       items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
