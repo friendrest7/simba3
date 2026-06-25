@@ -187,7 +187,6 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           redirectTo: redirectTo.toString(),
           queryParams: {
             access_type: "offline",
-            prompt: "select_account",
           },
         },
       });
@@ -290,7 +289,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-canvas px-5 py-3 text-sm font-black transition hover:border-brand disabled:opacity-60"
           >
             <GoogleIcon />
-            {t("continueWithGoogle")}
+            Continue to Simba
           </button>
         </>
       )}

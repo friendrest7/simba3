@@ -125,9 +125,6 @@ export function HomeContent({
                     sizes="(min-width: 1024px) 52vw, (min-width: 640px) 88vw, 94vw"
                   />
                 ))}
-                <span className="absolute bottom-3 left-3 rounded-full bg-black/70 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">
-                  {t("clickImageToSlide")}
-                </span>
               </button>
               <button
                 type="button"

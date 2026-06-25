@@ -99,6 +99,11 @@ export function Header() {
             <UserRound />
             <span>{accountLabel}</span>
           </Link>
+          {user && (
+            <button onClick={handleSignOut} className="hidden h-10 items-center gap-1.5 rounded-md bg-brand/10 px-3 text-xs font-black text-ink transition hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 lg:flex">
+              {t("signout")}
+            </button>
+          )}
           <Link href="/cart" className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
