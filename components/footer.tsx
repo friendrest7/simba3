@@ -35,6 +35,7 @@ export function Footer() {
     {
       title: t("help"),
       links: [
+        ["FAQ", "/faq"],
         [t("track"), "/dashboard/client"],
         [t("askSimba"), "/shop"],
         ["Feature verification", "/features"],
