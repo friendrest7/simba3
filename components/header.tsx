@@ -99,11 +99,6 @@ export function Header() {
             <UserRound />
             <span>{accountLabel}</span>
           </Link>
-          {user && (
-            <button onClick={handleSignOut} className="hidden h-10 items-center gap-1.5 rounded-md bg-brand/10 px-3 text-xs font-black text-ink transition hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 lg:flex">
-              {t("signout")}
-            </button>
-          )}
           <Link href="/cart" className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
@@ -158,7 +153,7 @@ export function Header() {
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
             </select>
           </label>
-          {user && <button onClick={handleSignOut} className="font-black text-ink dark:text-white">{t("signout")}</button>}
+          {user && <Link onClick={() => setSecondaryNavOpen(false)} href={accountHref} className="font-black text-brand dark:text-white">{user.name.split(" ")[0]}</Link>}
         </div>
       </div>
 
