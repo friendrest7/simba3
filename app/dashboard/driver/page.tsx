@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { DriverConsole } from "@/components/driver-console";
+import { DriverConsoleWrapper } from "@/components/driver-console";
 
 export default function DriverDashboard() {
-  return <DashboardShell role="driver"><DriverConsole /></DashboardShell>;
+  return <DashboardShell role="driver"><DriverConsoleWrapper /></DashboardShell>;
 }
