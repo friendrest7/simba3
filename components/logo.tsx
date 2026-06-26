@@ -5,21 +5,20 @@ export function Logo({ inverse = false }: { inverse?: boolean }) {
   return (
     <Link
       href="/"
-      className={`relative block shrink-0 overflow-hidden bg-white ${
+      className={`relative block shrink-0 ${
         inverse
-          ? "h-[74px] w-[58px] rounded-md p-1"
-          : "h-11 w-9 rounded-md border border-white/70 p-0.5 shadow-sm sm:h-14 sm:w-11"
+          ? "h-[90px] w-[72px]"
+          : "h-14 w-11 sm:h-16 sm:w-[52px]"
       }`}
       aria-label="Simba Supermarket home"
     >
       <Image
         src="/images/logo.png"
         alt="Simba Supermarket"
-        width={58}
-        height={74}
-        className="h-full w-full object-contain p-0.5"
+        fill
+        className="object-contain"
+        priority
       />
     </Link>
   );
 }
-
