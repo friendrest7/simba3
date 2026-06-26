@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, Bookmark, BookmarkCheck, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useStore } from "@/components/store-provider";
 import { Price } from "@/components/price";
 import { ProductImage } from "@/components/product-image";
@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/product-card";
 import { allProducts } from "@/lib/catalog-products";
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, clearCart, t } = useStore();
+  const { cart, updateQuantity, removeFromCart, clearCart, saveForLater, savedForLater, moveToCart, removeFromSaved, t } = useStore();
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;
   const cartIds = new Set(cart.map((item) => item.product.id));
@@ -43,7 +43,15 @@ export default function CartPage() {
                   <p className="text-[10px] font-black uppercase text-muted">{product.category}</p>
                   <Link href={`/products/${product.id}`} className="mt-1 block font-black">{product.name}</Link>
                   <p className="mt-2 text-xs text-muted">{product.unit} &middot; {product.seller}</p>
-                  <button onClick={() => removeFromCart(product.id)} className="mt-4 flex items-center gap-1 text-xs font-bold text-brand"><Trash2 className="h-3.5 w-3.5" /> {t("remove")}</button>
+                  <div className="mt-4 flex items-center gap-3">
+                    <button onClick={() => removeFromCart(product.id)} className="flex items-center gap-1 text-xs font-bold text-brand">
+                      <Trash2 className="h-3.5 w-3.5" /> {t("remove")}
+                    </button>
+                    <span className="text-line">|</span>
+                    <button onClick={() => saveForLater(product.id)} className="flex items-center gap-1 text-xs font-bold text-muted hover:text-brand">
+                      <Bookmark className="h-3.5 w-3.5" /> Save for later
+                    </button>
+                  </div>
                 </div>
                 <div className="col-span-2 flex items-center justify-between sm:col-span-1 sm:flex-col sm:items-end">
                   <Price value={product.price * quantity} className="font-black" />
@@ -74,6 +82,45 @@ export default function CartPage() {
           </aside>
         </div>
       )}
+
+      {/* Saved for Later shelf */}
+      {savedForLater.length > 0 && (
+        <section className="mt-14 border-t border-line pt-10">
+          <div className="flex items-center gap-3">
+            <BookmarkCheck className="h-5 w-5 text-brand" />
+            <h2 className="text-2xl font-black">Saved for later <span className="text-muted">({savedForLater.length})</span></h2>
+          </div>
+          <p className="mt-1 text-sm text-muted">Items you moved out of your cart. Move them back any time.</p>
+          <div className="mt-6 divide-y divide-line border-y border-line">
+            {savedForLater.map(({ product, quantity }) => (
+              <div key={product.id} className="grid grid-cols-[80px_1fr] gap-4 py-5 sm:grid-cols-[100px_1fr_auto]">
+                <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden rounded-lg border border-line bg-white">
+                  <ProductImage src={product.image} alt={product.name} fill className="object-contain p-2" sizes="100px" />
+                </Link>
+                <div className="min-w-0 py-1">
+                  <p className="text-[10px] font-black uppercase text-muted">{product.category}</p>
+                  <Link href={`/products/${product.id}`} className="mt-1 block font-black">{product.name}</Link>
+                  <p className="mt-1 text-xs text-muted">{product.unit}</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <button onClick={() => moveToCart(product.id)} className="flex items-center gap-1 text-xs font-bold text-brand hover:opacity-80">
+                      <ShoppingBag className="h-3.5 w-3.5" /> Move to cart
+                    </button>
+                    <span className="text-line">|</span>
+                    <button onClick={() => removeFromSaved(product.id)} className="flex items-center gap-1 text-xs font-bold text-muted hover:text-brand">
+                      <Trash2 className="h-3.5 w-3.5" /> Remove
+                    </button>
+                  </div>
+                </div>
+                <div className="hidden sm:flex sm:flex-col sm:items-end sm:justify-center">
+                  <Price value={product.price * quantity} className="font-black" />
+                  <p className="mt-1 text-xs text-muted">qty: {quantity}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {!!cart.length && <section className="mt-16 border-t border-line pt-10"><span className="eyebrow">Complete your basket</span><h2 className="mt-2 text-2xl font-black">Recommended for your cart</h2><p className="mt-2 text-sm text-muted">Suggestions update from the categories already in your basket.</p><div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">{recommendations.map((product) => <ProductCard key={product.id} product={product} />)}</div></section>}
     </div>
   );

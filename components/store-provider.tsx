@@ -58,6 +58,7 @@ type StoreContextValue = {
   cartCount: number;
   recentAdds: CartItem[];
   cartPanelOpen: boolean;
+  savedForLater: CartItem[];
   user: User | null;
   authLoading: boolean;
   theme: "light" | "dark";
@@ -72,6 +73,9 @@ type StoreContextValue = {
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   closeCartPanel: () => void;
+  saveForLater: (id: string) => void;
+  moveToCart: (id: string) => void;
+  removeFromSaved: (id: string) => void;
   signOut: () => Promise<void>;
   toggleTheme: () => void;
   setAccent: (accent: Accent) => void;
@@ -105,6 +109,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>("en");
   const [savedProductIds, setSavedProductIds] = useState<string[]>([]);
   const [managedProducts, setManagedProducts] = useState<Product[]>([]);
+  const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [accountStateReady, setAccountStateReady] = useState(false);
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
@@ -119,17 +124,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const savedLanguage = localStorage.getItem("simba-language") as LanguageCode | null;
     const savedProducts = localStorage.getItem("simba-saved-products");
     const savedManagedProducts = localStorage.getItem("simba-managed-products");
+    const savedForLaterRaw = localStorage.getItem("simba-saved-for-later");
 
     try {
       if (savedCart) setCart(JSON.parse(savedCart));
       if (savedProducts) setSavedProductIds(JSON.parse(savedProducts));
       if (savedManagedProducts) setManagedProducts(JSON.parse(savedManagedProducts));
+      if (savedForLaterRaw) setSavedForLater(JSON.parse(savedForLaterRaw));
     } catch {
       localStorage.removeItem("simba-cart");
       localStorage.removeItem("simba-saved-products");
       localStorage.removeItem("simba-managed-products");
-    }
-    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
+      localStorage.removeItem("simba-saved-for-later");
+    }    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
     if (savedAccent) setAccentState(savedAccent);
     if (savedCurrency && Object.hasOwn({ RWF: true, ZAR: true, USD: true, EUR: true, GBP: true, BWP: true }, savedCurrency)) setCurrencyState(savedCurrency);
     if (savedBranchId && branches.some((branch) => branch.id === savedBranchId)) setSelectedBranchIdState(savedBranchId);
@@ -285,10 +292,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("simba-language", language);
     localStorage.setItem("simba-saved-products", JSON.stringify(savedProductIds));
     localStorage.setItem("simba-managed-products", JSON.stringify(managedProducts));
+    localStorage.setItem("simba-saved-for-later", JSON.stringify(savedForLater));
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.dataset.accent = accent;
     document.documentElement.lang = language;
-  }, [cart, theme, accent, currency, selectedBranchId, language, savedProductIds, managedProducts, ready]);
+  }, [cart, theme, accent, currency, selectedBranchId, language, savedProductIds, managedProducts, savedForLater, ready]);
 
   const addToCart = (product: Product, quantity = 1) => {
     if (product.stock <= 0) return;
@@ -313,6 +321,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
     recentAdds,
     cartPanelOpen,
+    savedForLater,
     user,
     authLoading,
     theme,
@@ -333,6 +342,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCartPanelOpen(false);
     },
     closeCartPanel: () => setCartPanelOpen(false),
+    saveForLater: (id) => {
+      const item = cart.find((c) => c.product.id === id);
+      if (!item) return;
+      setCart((items) => items.filter((c) => c.product.id !== id));
+      setSavedForLater((items) => items.some((c) => c.product.id === id) ? items : [...items, item]);
+    },
+    moveToCart: (id) => {
+      const item = savedForLater.find((c) => c.product.id === id);
+      if (!item) return;
+      setSavedForLater((items) => items.filter((c) => c.product.id !== id));
+      setCart((items) => {
+        const existing = items.find((c) => c.product.id === id);
+        return existing ? items.map((c) => c.product.id === id ? { ...c, quantity: Math.min(c.product.stock, c.quantity + item.quantity) } : c) : [...items, item];
+      });
+    },
+    removeFromSaved: (id) => setSavedForLater((items) => items.filter((c) => c.product.id !== id)),
     signOut: async () => {
       if (supabase) await supabase.auth.signOut();
       setUser(null);
