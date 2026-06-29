@@ -58,6 +58,11 @@ function localReply(message: string, matches: Product[]) {
   return "I could not find a close catalog match yet. Tell me the product type, budget, or intended use, such as breakfast, healthy snacks, or groceries under FRw 10,000.";
 }
 
+function isProductQuery(message: string) {
+  const q = message.toLowerCase();
+  return /\b(buy|shop|find|show|need|want|look(ing)? for|price|product|snack|food|drink|groceri|chip|juice|oil|soap|rice|sugar|milk|bread|cereal|vegetable|fruit|meat|chicken|beef|fish|cleanin|hygiene|cosmetic|basket|cart|stock|available|sell|categor)\b/.test(q);
+}
+
 function groqMessages(messages: ChatMessage[], matchedProducts: Product[]) {
   const firstUserIndex = messages.findIndex((message) => message.role === "user");
   const conversation = (firstUserIndex >= 0 ? messages.slice(firstUserIndex) : messages).slice(-6);
@@ -78,14 +83,13 @@ function groqMessages(messages: ChatMessage[], matchedProducts: Product[]) {
     {
       role: "system",
       content: [
-        "You are Simba AI, the conversational product search assistant for Simba Supermarket Rwanda.",
-        "The application searches its catalog before asking you to respond.",
-        "Treat MATCHED_PRODUCTS_FROM_SIMBA_CATALOG as the complete and authoritative search result for the current request.",
-        "Only recommend products in that list. Never invent a product, price, stock status, seller, or promotion.",
-        "Use exact product names and prices from the list. Prefer available products.",
-        "If the list is empty for a product request, ask one short clarifying question instead of suggesting outside products.",
-        "For service questions: Track opens delivery status and ETA; checkout supports mobile money, card, and cash where available; branch selection controls availability.",
-        "Reply in friendly plain text without Markdown and stay under 90 words.",
+        "You are Simba AI, a friendly assistant for Simba Supermarket Rwanda.",
+        "You can chat naturally — greet users, answer general questions, tell jokes, and hold a normal conversation.",
+        "When the user asks about products, prices, or shopping, use MATCHED_PRODUCTS_FROM_SIMBA_CATALOG as the authoritative catalog.",
+        "Only recommend products from that list. Never invent products, prices, or stock status.",
+        "If the catalog list is empty for a product request, ask one short clarifying question.",
+        "For store questions: Track shows delivery status and ETA; checkout supports mobile money, card, and cash where available; branch selection controls availability.",
+        "Reply in friendly plain text without Markdown, under 100 words.",
       ].join(" "),
     },
     ...conversation.map((message, index) => ({
@@ -116,16 +120,16 @@ export async function POST(request: Request) {
     .slice(-3)
     .map((message) => message.content)
     .join(" ");
-  const matchedProducts = searchProducts(allProducts, recentUserQuery || latest, 4);
+  const productQuery = isProductQuery(latest);
+  const matchedProducts = productQuery ? searchProducts(allProducts, recentUserQuery || latest, 4) : [];
   const responseProducts = matchedProducts.map(clientProduct);
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({
-      reply: localReply(latest, matchedProducts),
-      products: responseProducts,
-      mode: "local",
-    });
+    const reply = productQuery
+      ? localReply(latest, matchedProducts)
+      : (serviceReply(latest) ?? "Hi! I'm Simba AI. I can help you find products, check prices, or answer questions about your order. What can I do for you?");
+    return NextResponse.json({ reply, products: responseProducts, mode: "local" });
   }
 
   try {

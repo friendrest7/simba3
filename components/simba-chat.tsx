@@ -29,7 +29,7 @@ export function SimbaChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi, I'm Simba AI. What are you shopping for today?",
+      content: "Hey! I'm Simba AI 👋 I can help you find products, answer questions, or just chat. What's up?",
     },
   ]);
   const sendMessageRef = useRef<(text: string) => void>(() => undefined);
@@ -107,9 +107,10 @@ export function SimbaChat() {
   }, [open]);
 
   const suggestions = [
-    "Show me available Simba chips",
-    "What can I buy under FRw 10,000?",
-    "I need a healthy snack",
+    "Hey, how are you?",
+    "What can you do?",
+    "Show me Simba chips",
+    "What's under FRw 10,000?",
   ];
 
   return (
