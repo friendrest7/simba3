@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Bookmark, BookmarkCheck, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useStore } from "@/components/store-provider";
 import { Price } from "@/components/price";
 import { ProductImage } from "@/components/product-image";
@@ -10,6 +11,7 @@ import { allProducts } from "@/lib/catalog-products";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, saveForLater, savedForLater, moveToCart, removeFromSaved, t } = useStore();
+  const [confirmClear, setConfirmClear] = useState(false);
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;
   const cartIds = new Set(cart.map((item) => item.product.id));
@@ -73,12 +75,19 @@ export default function CartPage() {
             </div>
             <Link href="/checkout" className="button-primary mt-6 w-full">{t("checkout")} <ArrowRight className="h-4 w-4" /></Link>
             <Link href="/shop" className="mt-4 block text-center text-xs font-bold text-muted hover:text-brand">{t("continueShopping")}</Link>
-            <button
-              onClick={() => { if (window.confirm("Clear your entire basket?")) clearCart(); }}
-              className="mt-4 block w-full text-center text-xs font-bold text-muted hover:text-brand"
-            >
-              Clear cart
-            </button>
+            {confirmClear ? (
+              <div className="mt-4 flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-xs dark:bg-red-950/30">
+                <span className="font-semibold text-red-700 dark:text-red-400">Clear entire basket?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => { clearCart(); setConfirmClear(false); }} className="rounded-md bg-red-600 px-2.5 py-1 font-bold text-white hover:bg-red-700">Yes</button>
+                  <button onClick={() => setConfirmClear(false)} className="rounded-md bg-muted/10 px-2.5 py-1 font-bold text-muted hover:bg-muted/20">No</button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setConfirmClear(true)} className="mt-4 block w-full text-center text-xs font-bold text-muted hover:text-brand">
+                Clear cart
+              </button>
+            )}
           </aside>
         </div>
       )}
