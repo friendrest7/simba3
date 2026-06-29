@@ -289,7 +289,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-canvas px-5 py-3 text-sm font-black transition hover:border-brand disabled:opacity-60"
           >
             <GoogleIcon />
-            Continue to Simba
+            Continue with Google
           </button>
         </>
       )}
