@@ -20,7 +20,12 @@ type PaymentResult = {
 };
 
 function normalizeMsisdn(phone: string) {
-  return phone.replace(/\D/g, "").replace(/^250/, "250");
+  const digits = phone.replace(/\D/g, "");
+  // 07xxxxxxxx → 2507xxxxxxxx
+  if (digits.startsWith("0")) return "250" + digits.slice(1);
+  // already has 250 prefix
+  if (digits.startsWith("250")) return digits;
+  return digits;
 }
 
 function mtnConfiguration() {

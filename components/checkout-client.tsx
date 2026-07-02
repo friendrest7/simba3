@@ -151,8 +151,8 @@ export function CheckoutClient() {
       return setError("Minimum order amount is 2,500 RWF. Please add more items to your basket.");
     }
 
-    if (!/^\+2507[2389]\d{7}$/.test(phone)) {
-      return setError("Please enter a valid Rwandan phone number (e.g., +250788123456).");
+    if (!/^(\+?2507[2389]\d{7}|07[2389]\d{7})$/.test(phone)) {
+      return setError("Please enter a valid Rwandan phone number (e.g., 0788123456).");
     }
 
     if (fulfilment === "delivery" && !clientCoords) {
@@ -270,7 +270,7 @@ export function CheckoutClient() {
               <button type="button" onClick={() => setPaymentProvider("airtel_money")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "airtel_money" ? "border-red-500 bg-red-500/10" : "border-line"}`}><Smartphone className="h-5 w-5 text-red-600" /><b className="mt-3 block text-sm">Airtel Money</b><small className="text-muted">Phone approval</small></button>
               <button type="button" onClick={() => setPaymentProvider("cash")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "cash" ? "border-[#16865c] bg-[#16865c]/10" : "border-line"}`}><Banknote className="h-5 w-5 text-[#16865c]" /><b className="mt-3 block text-sm">Cash</b><small className="text-muted">Pay on fulfilment</small></button>
             </div>
-            <div><label className="form-label">Rwandan phone number</label><div className="relative"><Phone className="input-icon" /><input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="+250788123456" /></div></div>
+            <div><label className="form-label">Rwandan phone number</label><div className="relative"><Phone className="input-icon" /><input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="0788123456" /></div></div>
           </section>
 
           {error && <p role="alert" className="rounded-md border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{error}</p>}
