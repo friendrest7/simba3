@@ -40,7 +40,6 @@ export function OrderInvoice({ result, user }: OrderInvoiceProps) {
         <div className="flex items-center justify-between border-b border-line pb-6">
           <div>
             <h1 className="text-2xl font-black text-brand">SIMBA INVOICE</h1>
-            <p className="text-xs text-muted">Order #{result.orderNumber}</p>
           </div>
           <CheckCircle2 className="h-12 w-12 text-[#16865c]" />
         </div>

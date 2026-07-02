@@ -41,13 +41,24 @@ export async function POST(request: Request) {
 
   const fulfilment = body?.fulfilment === "pickup" ? "pickup" : "delivery";
   const branchId = text(body?.branchId, 100);
-  const phone = text(body?.phone, 30).replace(/\s/g, "");
+
+  // Normalize phone: strip spaces/dashes, convert local 07xxxxxxxx → +2507xxxxxxxx
+  const rawPhone = text(body?.phone, 30).replace(/[\s\-()]/g, "");
+  let phone = rawPhone;
+  if (/^07[2389]\d{7}$/.test(rawPhone)) {
+    phone = "+250" + rawPhone.slice(1); // 0788... → +250788...
+  } else if (/^2507[2389]\d{7}$/.test(rawPhone)) {
+    phone = "+" + rawPhone;             // 250788... → +250788...
+  }
+  // After normalization, must be +2507[2389]xxxxxxx
+  const phoneValid = /^\+2507[2389]\d{7}$/.test(phone);
+
   const paymentProvider = body?.paymentProvider === "mtn_momo" || body?.paymentProvider === "airtel_money"
     ? body.paymentProvider
     : body?.paymentProvider === "cash" ? "cash"
     : body?.paymentProvider === "qr_code" ? "qr_code" : null;
-  if (!paymentProvider || !/^\+2507[2389]\d{7}$/.test(phone)) {
-    return NextResponse.json({ error: "Choose a payment method and enter a valid Rwandan phone number." }, { status: 400 });
+  if (!paymentProvider || !phoneValid) {
+    return NextResponse.json({ error: "Choose a payment method and enter a valid Rwandan phone number (e.g. 0788123456)." }, { status: 400 });
   }
 
   // Distance-based fee

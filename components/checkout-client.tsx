@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Banknote,
@@ -20,6 +21,7 @@ import { branches } from "@/lib/data";
 import { deliveryTimeSlots, distanceBasedFee, distanceEstimatedHours, haversineKm } from "@/lib/delivery";
 import { useStore } from "./store-provider";
 import { OrderInvoice } from "./order-invoice";
+import { SimbaQrPanel } from "./simba-qr-panel";
 
 type PaymentProvider = "mtn_momo" | "airtel_money" | "cash" | "qr_code";
 type FulfilmentMethod = "delivery" | "pickup";
@@ -209,7 +211,56 @@ export function CheckoutClient() {
     }
   }
 
-  if (authLoading || !user) return <div className="min-h-[70vh] py-24 text-center text-sm text-muted">{t("protectedRoute")}</div>;
+  if (authLoading) {
+    return (
+      <div className="min-h-[70vh] py-24 text-center text-sm text-muted">
+        {t("protectedRoute")}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="mx-auto flex min-h-[80vh] max-w-lg flex-col items-center justify-center gap-0 px-4 py-20 text-center">
+        <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand/10">
+          <LockKeyhole className="h-8 w-8 text-brand" />
+        </span>
+        <h1 className="mt-6 text-3xl font-black">Sign in to checkout</h1>
+        <p className="mt-3 max-w-sm leading-7 text-muted">
+          You need a Simba account to place orders, track deliveries, and pay with QR code or
+          mobile money. It takes less than a minute to create one.
+        </p>
+
+        {/* Simba QR panel — visible even before sign-in so users know the option exists */}
+        <div className="mt-8 w-full max-w-xs">
+          <SimbaQrPanel compact />
+        </div>
+
+        <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
+          <Link
+            href="/signin?next=/checkout"
+            className="button-primary w-full justify-center"
+          >
+            <LockKeyhole className="h-4 w-4" />
+            Sign in to your account
+          </Link>
+          <Link
+            href="/signup?next=/checkout"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-canvas px-5 py-3 text-sm font-black transition hover:border-brand"
+          >
+            Create a free account
+          </Link>
+        </div>
+
+        <p className="mt-6 text-xs text-muted">
+          Already browsing?{" "}
+          <Link href="/shop" className="font-bold text-brand">
+            Continue shopping
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   if (result?.orderStatus === "confirmed") {
     return <OrderInvoice result={result} user={user!} />;
@@ -234,33 +285,21 @@ export function CheckoutClient() {
         </span>
         <h1 className="mt-6 text-3xl font-black">Scan to pay</h1>
         <p className="mt-3 leading-7 text-muted">
-          Show this QR code to the cashier or scan it with the Simba Pay terminal to complete your payment of{" "}
-          <strong>{rwf.format(result.totalRwf)}</strong> for order <strong>{result.orderNumber}</strong>.
+          Scan the Simba store QR code with MTN MoMo or Airtel Money to pay{" "}
+          <strong>{rwf.format(result.totalRwf)}</strong> for order{" "}
+          <strong>{result.orderNumber}</strong>.
         </p>
-        <div className="mt-8 flex justify-center">
-          {qrLoading ? (
-            <span className="grid h-64 w-64 place-items-center rounded-2xl border border-line bg-canvas">
-              <Loader2 className="h-10 w-10 animate-spin text-brand" />
-            </span>
-          ) : qrDataUrl ? (
-            <img
-              src={qrDataUrl}
-              alt={`QR code for order ${result.orderNumber}`}
-              className="h-64 w-64 rounded-2xl border border-line shadow-soft"
-              width={256}
-              height={256}
-            />
-          ) : (
-            <span className="grid h-64 w-64 place-items-center rounded-2xl border border-red-200 bg-red-50 text-xs text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-              QR code unavailable
-            </span>
-          )}
+
+        <div className="mt-8">
+          <SimbaQrPanel />
         </div>
+
         <p className="mt-6 text-xs text-muted">
-          Order confirmed · Reference: <span className="font-bold text-ink">{result.orderNumber}</span>
+          Order confirmed · Reference:{" "}
+          <span className="font-bold text-ink">{result.orderNumber}</span>
         </p>
         <p className="mt-1 text-xs text-muted">
-          This code expires once your payment is processed. Keep this screen open.
+          Enter exactly <strong>{rwf.format(result.totalRwf)}</strong> when prompted by your payment app.
         </p>
       </div>
     );
@@ -361,6 +400,13 @@ export function CheckoutClient() {
               {instructions && (
                 <p><span className="font-bold text-ink">Instructions:</span> {instructions}</p>
               )}
+            </div>
+          )}
+
+          {/* Static Simba store QR — shown whenever QR Code payment is selected */}
+          {paymentProvider === "qr_code" && (
+            <div className="mt-5 border-t border-line pt-5">
+              <SimbaQrPanel compact />
             </div>
           )}
         </aside>
