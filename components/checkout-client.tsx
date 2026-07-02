@@ -90,11 +90,62 @@ export function CheckoutClient() {
     [estimatedHours],
   );
 
-  function detectLocation() {
+  async function detectLocation() {
     if (!navigator.geolocation) { setGeoStatus("denied"); return; }
     setGeoStatus("loading");
     navigator.geolocation.getCurrentPosition(
-      (pos) => { setClientCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setGeoStatus("ok"); },
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setClientCoords({ lat, lng });
+        setGeoStatus("ok");
+
+        // Reverse-geocode with Nominatim (OpenStreetMap) — free, no API key needed
+        try {
+          const resp = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+            { headers: { "Accept-Language": "en" } },
+          );
+          if (!resp.ok) return;
+          const geo = await resp.json() as {
+            display_name?: string;
+            address?: {
+              road?: string;
+              pedestrian?: string;
+              path?: string;
+              quarter?: string;
+              neighbourhood?: string;
+              suburb?: string;
+              city_district?: string;
+              town?: string;
+              village?: string;
+              city?: string;
+              county?: string;
+              state?: string;
+            };
+          };
+
+          const a = geo.address ?? {};
+
+          // Build street line: road / path / pedestrian
+          const street = a.road ?? a.pedestrian ?? a.path ?? "";
+
+          // Sector / area: suburb or quarter or neighbourhood
+          const sector = a.suburb ?? a.quarter ?? a.neighbourhood ?? a.city_district ?? "";
+
+          // Build full address string
+          const parts = [street, sector, a.city ?? a.town ?? a.village ?? "Kigali"]
+            .filter(Boolean);
+          const fullAddress = parts.join(", ");
+
+          // Nearby landmark hint: city district or county
+          const landmarkHint = a.city_district ?? a.county ?? "";
+
+          if (fullAddress) setAddress(fullAddress);
+          if (landmarkHint && !landmark) setLandmark(landmarkHint);
+        } catch {
+          // Reverse geocoding failed silently — user can still type the address
+        }
+      },
       () => setGeoStatus("denied"),
       { timeout: 10_000 },
     );
@@ -334,6 +385,7 @@ export function CheckoutClient() {
                       {geoStatus === "ok" && distanceKm != null ? (
                         <p className="mt-1 text-xs text-[#16865c] font-bold">
                           {distanceKm.toFixed(1)} km from {selectedBranch.name} · Fee: {rwf.format(feeRwf!)}
+                          {address && <span className="block font-normal text-muted mt-0.5">Address filled from GPS</span>}
                         </p>
                       ) : geoStatus === "denied" ? (
                         <p className="mt-1 text-xs text-red-600">Location denied — enter address manually below.</p>
