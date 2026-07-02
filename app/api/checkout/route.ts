@@ -44,7 +44,8 @@ export async function POST(request: Request) {
   const phone = text(body?.phone, 30).replace(/\s/g, "");
   const paymentProvider = body?.paymentProvider === "mtn_momo" || body?.paymentProvider === "airtel_money"
     ? body.paymentProvider
-    : body?.paymentProvider === "cash" ? "cash" : null;
+    : body?.paymentProvider === "cash" ? "cash"
+    : body?.paymentProvider === "qr_code" ? "qr_code" : null;
   if (!paymentProvider || !/^\+2507[2389]\d{7}$/.test(phone)) {
     return NextResponse.json({ error: "Choose a payment method and enter a valid Rwandan phone number." }, { status: 400 });
   }
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
   const orderPayload = {
     user_id: authData.user.id,
     branch_id: text(body?.branchId, 100) || null,
-    status: paymentProvider === "cash" ? "confirmed" : "pending",
+    status: paymentProvider === "cash" || paymentProvider === "qr_code" ? "confirmed" : "pending",
     subtotal_rwf: subtotalRwf,
     delivery_fee_rwf: feeRwf,
     total_rwf: totalRwf,
@@ -119,8 +120,12 @@ export async function POST(request: Request) {
 
   await supabase.from("order_status_events").insert({
     order_id: order.id,
-    status: paymentProvider === "cash" ? "confirmed" : "pending",
-    note: paymentProvider === "cash" ? "Cash order confirmed." : "Waiting for mobile money approval.",
+    status: paymentProvider === "cash" || paymentProvider === "qr_code" ? "confirmed" : "pending",
+    note: paymentProvider === "cash"
+      ? "Cash order confirmed."
+      : paymentProvider === "qr_code"
+      ? "QR code payment order placed. Scan the QR code to complete payment."
+      : "Waiting for mobile money approval.",
     created_by: authData.user.id,
   });
 
@@ -133,6 +138,20 @@ export async function POST(request: Request) {
       totalRwf,
       deliveryFeeRwf: feeRwf,
       estimatedDeliveryAt: estimatedAt,
+      items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
+    }, { status: 201 });
+  }
+
+  if (paymentProvider === "qr_code") {
+    return NextResponse.json({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      paymentStatus: "pending",
+      orderStatus: "confirmed",
+      totalRwf,
+      deliveryFeeRwf: feeRwf,
+      estimatedDeliveryAt: estimatedAt,
+      qrPayment: true,
       items: detailedItems.map(i => ({ name: i.product_name, quantity: i.quantity, price: i.unit_price_rwf })),
     }, { status: 201 });
   }

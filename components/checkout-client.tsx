@@ -9,6 +9,7 @@ import {
   MapPin,
   Navigation,
   Phone,
+  QrCode,
   ShieldCheck,
   Smartphone,
   Store,
@@ -20,7 +21,7 @@ import { deliveryTimeSlots, distanceBasedFee, distanceEstimatedHours, haversineK
 import { useStore } from "./store-provider";
 import { OrderInvoice } from "./order-invoice";
 
-type PaymentProvider = "mtn_momo" | "airtel_money" | "cash";
+type PaymentProvider = "mtn_momo" | "airtel_money" | "cash" | "qr_code";
 type FulfilmentMethod = "delivery" | "pickup";
 type Address = {
   id: string;
@@ -45,6 +46,7 @@ type CheckoutResult = {
   deliveryFeeRwf: number;
   estimatedDeliveryAt: string;
   demoPayment?: boolean;
+  qrPayment?: boolean;
   items: Array<{ name: string; quantity: number; price: number }>;
 };
 
@@ -65,6 +67,8 @@ export function CheckoutClient() {
   const [paymentChecking, setPaymentChecking] = useState(false);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [error, setError] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
   // Distance-based delivery
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "ok" | "denied">("idle");
   const [clientCoords, setClientCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -143,6 +147,21 @@ export function CheckoutClient() {
     setPaymentChecking(false);
   }
 
+  async function fetchQrCode(checkout: CheckoutResult) {
+    setQrLoading(true);
+    try {
+      const url = `/api/qr-payment?orderId=${encodeURIComponent(checkout.orderId)}&amount=${encodeURIComponent(checkout.totalRwf)}&orderNumber=${encodeURIComponent(checkout.orderNumber)}`;
+      const response = await fetch(url);
+      const data = await response.json().catch(() => null);
+      if (data?.qrDataUrl) setQrDataUrl(data.qrDataUrl);
+      else setError("Could not generate QR code. Your order is confirmed — please contact the store.");
+    } catch {
+      setError("Could not generate QR code. Your order is confirmed — please contact the store.");
+    } finally {
+      setQrLoading(false);
+    }
+  }
+
   async function placeOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -182,8 +201,12 @@ export function CheckoutClient() {
     setPlacingOrder(false);
     if (!response.ok) return setError(data?.error || "Your order could not be placed.");
     setResult(data);
-    if (paymentProvider === "cash") clearCart();
-    else void pollPayment(data);
+    if (paymentProvider === "cash" || paymentProvider === "qr_code") {
+      clearCart();
+      if (paymentProvider === "qr_code") void fetchQrCode(data);
+    } else {
+      void pollPayment(data);
+    }
   }
 
   if (authLoading || !user) return <div className="min-h-[70vh] py-24 text-center text-sm text-muted">{t("protectedRoute")}</div>;
@@ -199,6 +222,46 @@ export function CheckoutClient() {
         <h1 className="mt-6 text-3xl font-black">Approve the payment on your phone</h1>
         <p className="mt-3 leading-7 text-muted">We are confirming {rwf.format(result.totalRwf)} for order {result.orderNumber}. Keep this page open.</p>
         {result.demoPayment && <p className="mt-4 rounded-md bg-amber-100 p-3 text-sm font-bold text-amber-800">Demo payment mode is active because provider credentials are not configured for this environment.</p>}
+      </div>
+    );
+  }
+
+  if (result?.qrPayment) {
+    return (
+      <div className="mx-auto min-h-[70vh] max-w-lg px-4 py-16 text-center">
+        <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand/10">
+          <QrCode className="h-8 w-8 text-brand" />
+        </span>
+        <h1 className="mt-6 text-3xl font-black">Scan to pay</h1>
+        <p className="mt-3 leading-7 text-muted">
+          Show this QR code to the cashier or scan it with the Simba Pay terminal to complete your payment of{" "}
+          <strong>{rwf.format(result.totalRwf)}</strong> for order <strong>{result.orderNumber}</strong>.
+        </p>
+        <div className="mt-8 flex justify-center">
+          {qrLoading ? (
+            <span className="grid h-64 w-64 place-items-center rounded-2xl border border-line bg-canvas">
+              <Loader2 className="h-10 w-10 animate-spin text-brand" />
+            </span>
+          ) : qrDataUrl ? (
+            <img
+              src={qrDataUrl}
+              alt={`QR code for order ${result.orderNumber}`}
+              className="h-64 w-64 rounded-2xl border border-line shadow-soft"
+              width={256}
+              height={256}
+            />
+          ) : (
+            <span className="grid h-64 w-64 place-items-center rounded-2xl border border-red-200 bg-red-50 text-xs text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+              QR code unavailable
+            </span>
+          )}
+        </div>
+        <p className="mt-6 text-xs text-muted">
+          Order confirmed · Reference: <span className="font-bold text-ink">{result.orderNumber}</span>
+        </p>
+        <p className="mt-1 text-xs text-muted">
+          This code expires once your payment is processed. Keep this screen open.
+        </p>
       </div>
     );
   }
@@ -265,16 +328,17 @@ export function CheckoutClient() {
           <section className="rounded-xl border border-line p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase text-brand">2. Payment</p>
             <h2 className="mt-2 text-lg font-black">Choose a payment method</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <button type="button" onClick={() => setPaymentProvider("mtn_momo")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "mtn_momo" ? "border-[#f4c400] bg-[#f4c400]/10" : "border-line"}`}><Smartphone className="h-5 w-5 text-[#b89100]" /><b className="mt-3 block text-sm">MTN MoMo</b><small className="text-muted">Request to Pay</small></button>
               <button type="button" onClick={() => setPaymentProvider("airtel_money")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "airtel_money" ? "border-red-500 bg-red-500/10" : "border-line"}`}><Smartphone className="h-5 w-5 text-red-600" /><b className="mt-3 block text-sm">Airtel Money</b><small className="text-muted">Phone approval</small></button>
               <button type="button" onClick={() => setPaymentProvider("cash")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "cash" ? "border-[#16865c] bg-[#16865c]/10" : "border-line"}`}><Banknote className="h-5 w-5 text-[#16865c]" /><b className="mt-3 block text-sm">Cash</b><small className="text-muted">Pay on fulfilment</small></button>
+              <button type="button" onClick={() => setPaymentProvider("qr_code")} className={`min-h-24 rounded-lg border p-4 text-left ${paymentProvider === "qr_code" ? "border-brand bg-brand/10" : "border-line"}`}><QrCode className="h-5 w-5 text-brand" /><b className="mt-3 block text-sm">QR Code</b><small className="text-muted">Scan at cashier</small></button>
             </div>
             <div><label className="form-label">Rwandan phone number</label><div className="relative"><Phone className="input-icon" /><input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="form-input pl-11" placeholder="0788123456" /></div></div>
           </section>
 
           {error && <p role="alert" className="rounded-md border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">{error}</p>}
-          <button disabled={!cart.length || placingOrder} className="button-primary w-full disabled:opacity-50">{placingOrder ? <Loader2 className="h-4 w-4 animate-spin" /> : paymentProvider === "cash" ? <Banknote className="h-4 w-4" /> : <Smartphone className="h-4 w-4" />}{placingOrder ? "Creating secure order..." : paymentProvider === "cash" ? `Place order · ${rwf.format(totalRwf)}` : `Request ${paymentProvider === "mtn_momo" ? "MTN MoMo" : "Airtel Money"} payment · ${rwf.format(totalRwf)}`}</button>
+          <button disabled={!cart.length || placingOrder} className="button-primary w-full disabled:opacity-50">{placingOrder ? <Loader2 className="h-4 w-4 animate-spin" /> : paymentProvider === "cash" ? <Banknote className="h-4 w-4" /> : paymentProvider === "qr_code" ? <QrCode className="h-4 w-4" /> : <Smartphone className="h-4 w-4" />}{placingOrder ? "Creating secure order..." : paymentProvider === "cash" ? `Place order · ${rwf.format(totalRwf)}` : paymentProvider === "qr_code" ? `Generate QR code · ${rwf.format(totalRwf)}` : `Request ${paymentProvider === "mtn_momo" ? "MTN MoMo" : "Airtel Money"} payment · ${rwf.format(totalRwf)}`}</button>
         </form>
 
         <aside className="h-fit rounded-xl border border-line bg-canvas p-5 shadow-soft lg:sticky lg:top-28">
