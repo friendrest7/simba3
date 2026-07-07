@@ -81,26 +81,26 @@ export function Header() {
           {t("allCategories")}
         </Link>
 
-        {/* Search bar */}
-        <form onSubmit={submitSearch} className="relative hidden w-36 shrink-0 md:block lg:w-44">
-          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-ink/55" />
+        {/* Search bar — takes all available middle space, matches shop style */}
+        <form onSubmit={submitSearch} className="relative hidden flex-1 md:flex md:items-center">
+          <Search className="input-icon" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("search")}
-            className="h-7 w-full rounded-md border border-brand bg-white pl-6 pr-8 text-[10px] font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-2 focus:ring-brand/20"
+            className="form-input pl-11 pr-12"
           />
           <button
             type="submit"
-            className="absolute right-0.5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded bg-brand text-white transition hover:bg-brand/90"
+            className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md bg-brand text-white transition hover:bg-brand/90"
             aria-label={t("searchProducts")}
           >
-            <Search className="h-2.5 w-2.5" />
+            <Search className="h-4 w-4" />
           </button>
         </form>
 
         {/* Right-side nav */}
-        <nav className="ml-auto flex items-center gap-1">
+        <nav className="flex shrink-0 items-center gap-1">
 
           {/* Language — visible on lg+ */}
           <label
