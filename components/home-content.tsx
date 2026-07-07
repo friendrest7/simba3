@@ -193,10 +193,10 @@ export function HomeContent({
       </section>
 
       <section className="mx-auto max-w-[1500px] px-5 py-14 text-ink sm:px-8 lg:px-10">
-        <form onSubmit={submitSearch} action="/shop" className="mb-8 flex w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-canvas p-1.5 text-ink">
-          <Search className="ml-3 mt-3 h-4 w-4 shrink-0 text-brand" />
-          <input name="q" className="min-w-0 flex-1 bg-transparent px-2.5 py-2.5 text-sm outline-none" placeholder={t("search")} />
-          <button className="rounded-lg bg-brand px-4 text-xs font-black text-white sm:px-6">{t("searchProducts")}</button>
+        <form onSubmit={submitSearch} action="/shop" className="relative mb-8 flex w-full max-w-3xl items-center text-ink">
+          <Search className="input-icon z-10" />
+          <input name="q" className="form-input pl-11 pr-32" placeholder={t("search")} />
+          <button className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-brand px-5 py-2 text-xs font-black text-white transition hover:opacity-90">{t("searchProducts")}</button>
         </form>
         <div className="flex items-end justify-between gap-4">
           <div>

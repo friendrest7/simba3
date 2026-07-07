@@ -119,11 +119,11 @@ export function Header() {
             </select>
           </label>
 
-          {/* Theme toggle — visible on lg+ */}
+          {/* Theme toggle — always visible */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden h-8 w-8 items-center justify-center rounded-md border border-brand/30 bg-white text-ink transition hover:bg-brand/10 lg:flex dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand/30 bg-white text-ink transition hover:bg-brand/10 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
             title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
           >

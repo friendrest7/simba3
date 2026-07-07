@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Bookmark, BookmarkCheck, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/components/store-provider";
 import { Price } from "@/components/price";
 import { ProductImage } from "@/components/product-image";
@@ -12,6 +12,10 @@ import { allProducts } from "@/lib/catalog-products";
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, saveForLater, savedForLater, moveToCart, removeFromSaved, t } = useStore();
   const [confirmClear, setConfirmClear] = useState(false);
+  // Prevent empty-cart flash before localStorage hydrates on client
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;
   const cartIds = new Set(cart.map((item) => item.product.id));
@@ -20,6 +24,30 @@ export default function CartPage() {
     .filter((product) => !cartIds.has(product.id))
     .sort((a, b) => Number(cartCategories.has(b.category)) - Number(cartCategories.has(a.category)) || b.rating - a.rating)
     .slice(0, 4);
+
+  if (!mounted) {
+    return (
+      <div className="mx-auto min-h-[70vh] max-w-[1200px] px-5 py-12 sm:px-8">
+        <div className="h-6 w-24 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-3 h-10 w-48 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="grid grid-cols-[130px_1fr] gap-4 py-5 border-b border-line">
+                <div className="aspect-square animate-pulse rounded-lg bg-black/10 dark:bg-white/10" />
+                <div className="space-y-3 py-1">
+                  <div className="h-3 w-16 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+                  <div className="h-5 w-48 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+                  <div className="h-3 w-32 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="h-64 animate-pulse rounded-xl bg-black/10 dark:bg-white/10" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto min-h-[70vh] max-w-[1200px] px-5 py-12 sm:px-8">
