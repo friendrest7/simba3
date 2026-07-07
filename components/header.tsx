@@ -67,34 +67,34 @@ export function Header() {
       style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .35), 0 10px 24px rgb(0 0 0 / .14)" }}
     >
       <div
-        className="mx-auto flex min-h-[76px] max-w-[1500px] items-center gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8"
+        className="mx-auto flex min-h-[61px] max-w-[1500px] items-center gap-2 px-3 py-2 sm:px-5 lg:gap-3 lg:px-6"
       >
         <Logo />
 
         <Link
           href="/shop"
-          className="hidden h-10 shrink-0 items-center rounded-md bg-brand px-3 text-xs font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
+          className="hidden h-8 shrink-0 items-center rounded-md bg-brand px-2.5 text-[11px] font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
         >
           {t("allCategories")}
         </Link>
 
         <form onSubmit={submitSearch} className="relative hidden min-w-0 flex-1 md:block">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/55" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/55" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("search")}
-            className="h-12 w-full rounded-md border-2 border-brand bg-white pl-12 pr-14 text-sm font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
+            className="h-9 w-full rounded-md border-2 border-brand bg-white pl-9 pr-11 text-xs font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
           />
           <button
-            className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md bg-brand text-white shadow-sm transition hover:bg-brand/90"
+            className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-md bg-brand text-white shadow-sm transition hover:bg-brand/90"
             aria-label={t("searchProducts")}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3 w-3" />
           </button>
         </form>
 
-        <nav className="ml-auto flex items-center gap-1 sm:gap-2">
+        <nav className="ml-auto flex items-center gap-1">
           {user ? (
             <button
               type="button"
@@ -115,53 +115,53 @@ export function Header() {
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
           </Link>
-          <label className="hidden h-10 cursor-pointer items-center gap-1.5 rounded-md border border-brand/25 bg-white px-2 text-ink xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white">
-            <Languages className="h-3.5 w-3.5" />
-            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-16 bg-transparent text-[10px] font-black text-ink outline-none dark:text-white [&>option]:text-black">
+          <label className="hidden h-8 cursor-pointer items-center gap-1 rounded-md border border-brand/25 bg-white px-2 text-ink xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white">
+            <Languages className="h-3 w-3" />
+            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-14 bg-transparent text-[9px] font-black text-ink outline-none dark:text-white [&>option]:text-black">
               {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
             </select>
           </label>
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden h-10 w-10 items-center justify-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            className="hidden h-8 w-8 items-center justify-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
             title={theme === "light" ? t("darkMode") : t("lightMode")}
           >
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
           </button>
           <button
             type="button"
             onClick={() => setSecondaryNavOpen((value) => !value)}
-            className="hidden h-11 w-11 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:grid dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            className="hidden h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:grid dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={secondaryNavOpen ? "Hide secondary navigation" : "Show secondary navigation"}
             aria-expanded={secondaryNavOpen}
           >
-            <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${secondaryNavOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${secondaryNavOpen ? "rotate-180" : ""}`} />
           </button>
           <button
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-11 w-11 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            className="grid h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             aria-label={t("menu")}
           >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </nav>
       </div>
 
       <div className={`${secondaryNavOpen ? "hidden border-t border-brand/20 bg-white lg:block dark:border-white/15 dark:bg-[#231a10]" : "hidden"}`}>
-        <div className="mx-auto flex h-11 max-w-[1500px] items-center gap-5 px-8 text-xs font-bold">
-          <Link href="/shop" className="rounded bg-white px-2.5 py-1 text-[11px] text-brand">{t("allCategories")}</Link>
+        <div className="mx-auto flex h-9 max-w-[1500px] items-center gap-4 px-6 text-[11px] font-bold">
+          <Link href="/shop" className="rounded bg-white px-2 py-0.5 text-[10px] text-brand">{t("allCategories")}</Link>
           <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("marketplace")}</Link>
           <Link href="/promotions" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("deals")}</Link>
           <Link href="/dashboard/client" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("track")}</Link>
           <Link href="/shop?saved=true" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">
-            {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded bg-brand px-1.5 py-0.5 text-[9px] text-white">{savedProductIds.length}</span>}
+            {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded bg-brand px-1 py-0.5 text-[8px] text-white">{savedProductIds.length}</span>}
           </Link>
           <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("compare")}</Link>
-          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded border border-brand/20 bg-brand/5 px-3 py-1.5 text-ink/75 dark:border-white/20 dark:bg-white/10 dark:text-white/80">
-            <MapPin className="h-4 w-4 text-brand dark:text-white" />
-            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent font-bold text-ink outline-none dark:text-white [&>option]:text-black">
+          <label className="ml-auto flex cursor-pointer items-center gap-1.5 rounded border border-brand/20 bg-brand/5 px-2 py-1 text-ink/75 dark:border-white/20 dark:bg-white/10 dark:text-white/80">
+            <MapPin className="h-3 w-3 text-brand dark:text-white" />
+            <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="bg-transparent text-[10px] font-bold text-ink outline-none dark:text-white [&>option]:text-black">
               {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
             </select>
           </label>

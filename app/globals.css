@@ -110,9 +110,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .input-icon { @apply absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted; }
   .dashboard-card { @apply border border-line bg-canvas p-5; border-radius: 6px; }
   .header-action {
-    @apply relative hidden min-w-14 flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px] font-bold text-white transition hover:bg-white/15 sm:flex;
+    @apply relative hidden min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-md px-1.5 py-1 text-[9px] font-bold text-white transition hover:bg-white/15 sm:flex;
   }
-  .header-action svg { @apply h-5 w-5; }
+  .header-action svg { @apply h-4 w-4; }
   .action-count {
     @apply absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] text-white;
   }
