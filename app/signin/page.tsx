@@ -1,8 +1,18 @@
 import Image from "next/image";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
+import { createClient } from "@/lib/supabase/server";
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) redirect("/dashboard/client");
+  } catch {
+    // Supabase not configured — allow the page to render so the user sees the form
+  }
+
   return (
     <div className="grid min-h-[720px] lg:grid-cols-2">
       <div className="flex flex-col items-center justify-center px-5 py-12">

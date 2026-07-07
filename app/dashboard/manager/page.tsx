@@ -13,7 +13,7 @@ const categoryImages: Record<string, string> = { Groceries: "/images/product-ric
 
 function ManagerContent() {
   const activeTool = useActiveTool();
-  const { user, managedProducts, addManagedProduct } = useStore();
+  const { user, managedProducts, addManagedProduct, t } = useStore();
   const branch = branches.find((b) => b.id === user?.branchId) || branches[0];
   const branchDrivers = drivers.filter((d) => d.branchId === branch.id);
   const [period, setPeriod] = useState<keyof typeof periods>("Today");
@@ -128,7 +128,7 @@ function ManagerContent() {
   </>;
 
   // Settings
-  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">Branch settings</h2><p className="mt-2 text-sm text-gray-500">Branch configuration and preferences will appear here.</p></div>;
+  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">{t("branchSettings")}</h2><p className="mt-2 text-sm text-gray-500">{t("branchSettingsText")}</p></div>;
 
   // Overview (default)
   return <>

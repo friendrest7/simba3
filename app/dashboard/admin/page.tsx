@@ -155,21 +155,23 @@ function ProductsSection() {
 }
 
 function UsersSection() {
+  const { t } = useStore();
   return (
     <div className="dashboard-card rounded-xl py-16 text-center">
       <Users className="mx-auto h-10 w-10 text-gray-400" />
-      <h2 className="mt-4 text-xl font-black">User management</h2>
-      <p className="mt-2 text-sm text-gray-500">Customer and staff accounts are managed via Supabase. User-level admin actions (suspend, role change) will be available here.</p>
+      <h2 className="mt-4 text-xl font-black">{t("userManagement")}</h2>
+      <p className="mt-2 text-sm text-gray-500">{t("userManagementText")}</p>
     </div>
   );
 }
 
 function SettingsSection() {
+  const { t } = useStore();
   return (
     <div className="dashboard-card rounded-xl py-16 text-center">
       <Settings className="mx-auto h-10 w-10 text-gray-400" />
-      <h2 className="mt-4 text-xl font-black">Admin settings</h2>
-      <p className="mt-2 text-sm text-gray-500">Platform configuration, notification preferences, and store settings will appear here.</p>
+      <h2 className="mt-4 text-xl font-black">{t("adminSettings")}</h2>
+      <p className="mt-2 text-sm text-gray-500">{t("adminSettingsText")}</p>
     </div>
   );
 }

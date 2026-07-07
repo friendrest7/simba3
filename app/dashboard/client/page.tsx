@@ -72,6 +72,7 @@ function useClientOrders() {
 }
 
 function OrderCard({ order, recurringOrders, frequency, setFrequency, buyAgain, makeRecurring }: { order: Order; recurringOrders: RecurringOrder[]; frequency: "weekly" | "biweekly" | "monthly"; setFrequency: (f: "weekly" | "biweekly" | "monthly") => void; buyAgain: (o: Order) => void; makeRecurring: (o: Order) => void }) {
+  const { t } = useStore();
   const currentIndex = steps.findIndex(([s]) => s === order.status);
   const recurring = recurringOrders.find((r) => r.source_order_id === order.id && r.active);
   return <article className="dashboard-card rounded-xl">
@@ -80,14 +81,22 @@ function OrderCard({ order, recurringOrders, frequency, setFrequency, buyAgain, 
       <div className="text-right"><span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-black capitalize text-brand">{order.status.replaceAll("_", " ")}</span><p className="mt-2 font-black">{rwf.format(Number(order.total_rwf))}</p></div>
     </div>
     {order.status !== "cancelled" && <div className="mt-7 grid grid-cols-5">{steps.map(([status, label], i) => { const complete = currentIndex >= i; return <div key={status} className="relative text-center"><span className={`relative z-10 mx-auto grid h-9 w-9 place-items-center rounded-full ${complete ? "bg-brand text-white" : "bg-gray-200 text-gray-400 dark:bg-white/10"}`}>{i < currentIndex ? <CheckCircle2 className="h-4 w-4" /> : i === 3 ? <Truck className="h-4 w-4" /> : i === 4 ? <Package className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}</span>{i < 4 && <span className={`absolute left-1/2 top-[17px] h-0.5 w-full ${currentIndex > i ? "bg-brand" : "bg-gray-200 dark:bg-white/10"}`} />}<span className="mt-2 block text-[9px] font-bold sm:text-[11px]">{label}</span></div>; })}</div>}
-    <details className="mt-6 border-t border-line pt-4"><summary className="min-h-11 cursor-pointer py-3 text-sm font-black">View order details</summary><div className="space-y-3 pt-2">{order.items.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-lg border border-line p-3"><div className="relative h-14 w-14 shrink-0 rounded-md bg-white"><ProductImage src={item.productImage} alt={item.productName} fill className="object-contain p-1" sizes="56px" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{item.productName}</p><p className="mt-1 text-xs text-gray-500">{item.quantity} × {rwf.format(item.unitPriceRwf)}</p></div></div>)}</div>{!!order.events.length && <div className="mt-4 space-y-2">{order.events.map((ev) => <p key={`${ev.status}-${ev.created_at}`} className="text-xs text-gray-500">{new Date(ev.created_at).toLocaleString("en-RW")} · <b className="capitalize text-ink">{ev.status.replaceAll("_", " ")}</b>{ev.note ? ` · ${ev.note}` : ""}</p>)}</div>}</details>
-    <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center"><button type="button" onClick={() => buyAgain(order)} className="button-primary !min-h-11"><ShoppingBag className="h-4 w-4" /> Buy Again</button><select value={frequency} onChange={(e) => setFrequency(e.target.value as typeof frequency)} className="form-input sm:max-w-40"><option value="weekly">Weekly</option><option value="biweekly">Bi-weekly</option><option value="monthly">Monthly</option></select><button type="button" disabled={Boolean(recurring)} onClick={() => void makeRecurring(order)} className="button-secondary !min-h-11 disabled:opacity-50"><Repeat2 className="h-4 w-4" /> {recurring ? `Next: ${new Date(recurring.next_delivery_date).toLocaleDateString()}` : "Make recurring"}</button></div>
+    <details className="mt-6 border-t border-line pt-4"><summary className="min-h-11 cursor-pointer py-3 text-sm font-black">{t("viewOrderDetails")}</summary><div className="space-y-3 pt-2">{order.items.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-lg border border-line p-3"><div className="relative h-14 w-14 shrink-0 rounded-md bg-white"><ProductImage src={item.productImage} alt={item.productName} fill className="object-contain p-1" sizes="56px" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{item.productName}</p><p className="mt-1 text-xs text-gray-500">{item.quantity} × {rwf.format(item.unitPriceRwf)}</p></div></div>)}</div>{!!order.events.length && <div className="mt-4 space-y-2">{order.events.map((ev) => <p key={`${ev.status}-${ev.created_at}`} className="text-xs text-gray-500">{new Date(ev.created_at).toLocaleString("en-RW")} · <b className="capitalize text-ink">{ev.status.replaceAll("_", " ")}</b>{ev.note ? ` · ${ev.note}` : ""}</p>)}</div>}</details>
+    <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center">
+      <button type="button" onClick={() => buyAgain(order)} className="button-primary !min-h-11"><ShoppingBag className="h-4 w-4" /> {t("buyAgain")}</button>
+      <select value={frequency} onChange={(e) => setFrequency(e.target.value as typeof frequency)} className="form-input sm:max-w-40">
+        <option value="weekly">{t("weekly")}</option>
+        <option value="biweekly">{t("biweekly")}</option>
+        <option value="monthly">{t("monthly")}</option>
+      </select>
+      <button type="button" disabled={Boolean(recurring)} onClick={() => void makeRecurring(order)} className="button-secondary !min-h-11 disabled:opacity-50"><Repeat2 className="h-4 w-4" /> {recurring ? `Next: ${new Date(recurring.next_delivery_date).toLocaleDateString()}` : t("makeRecurring")}</button>
+    </div>
   </article>;
 }
 
 function ClientContent() {
   const activeTool = useActiveTool();
-  const { savedProductIds, addToCart } = useStore();
+  const { savedProductIds, addToCart, t } = useStore();
   const { orders, recurringOrders, loading, error, notice, frequency, setFrequency, loadOrders, buyAgain, makeRecurring } = useClientOrders();
 
   const activeOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
@@ -102,34 +111,34 @@ function ClientContent() {
   // Track deliveries — show only active orders with tracking
   if (activeTool === "Track deliveries") return <>
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div><h2 className="text-2xl font-black">Track deliveries</h2><p className="mt-2 text-sm text-gray-500">Live status of your active orders.</p></div>
-      <button type="button" onClick={() => void loadOrders()} className="button-secondary !min-h-11"><RefreshCw className="h-4 w-4" /> Refresh status</button>
+      <div><h2 className="text-2xl font-black">{t("trackDeliveriesTitle")}</h2><p className="mt-2 text-sm text-gray-500">{t("liveStatusActive")}</p></div>
+      <button type="button" onClick={() => void loadOrders()} className="button-secondary !min-h-11"><RefreshCw className="h-4 w-4" /> {t("refreshStatus")}</button>
     </div>
     {statusMessage && statusAlert(statusMessage)}
     {loading ? <div className="py-20 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-brand" /></div> : activeOrders.length ? (
       <div className="mt-8 space-y-5">{activeOrders.map((o) => <OrderCard key={o.id} order={o} recurringOrders={recurringOrders} frequency={frequency} setFrequency={setFrequency} buyAgain={buyAgain} makeRecurring={makeRecurring} />)}</div>
-    ) : <div className="dashboard-card mt-8 rounded-xl py-16 text-center"><Truck className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-xl font-black">No active deliveries</h3><p className="mt-2 text-sm text-gray-500">Your orders in transit will show here with live tracking.</p></div>}
+    ) : <div className="dashboard-card mt-8 rounded-xl py-16 text-center"><Truck className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-xl font-black">{t("noActiveDeliveries")}</h3><p className="mt-2 text-sm text-gray-500">{t("noActiveDeliveriesText")}</p></div>}
   </>;
 
   // Settings
-  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">Account settings</h2><p className="mt-2 text-sm text-gray-500">Profile, notifications, and delivery preferences will appear here.</p></div>;
+  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">{t("accountSettings")}</h2><p className="mt-2 text-sm text-gray-500">{t("accountSettingsText")}</p></div>;
 
   // My orders (also default Overview)
   return <>
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div><h2 className="text-2xl font-black">Your Simba orders</h2><p className="mt-2 text-sm text-gray-500">History, live tracking, reorders, and scheduled deliveries.</p></div>
-      <button type="button" onClick={() => void loadOrders()} className="button-secondary !min-h-11"><RefreshCw className="h-4 w-4" /> Refresh status</button>
+      <div><h2 className="text-2xl font-black">{t("yourSimbaOrders")}</h2><p className="mt-2 text-sm text-gray-500">{t("historyTrackingReorders")}</p></div>
+      <button type="button" onClick={() => void loadOrders()} className="button-secondary !min-h-11"><RefreshCw className="h-4 w-4" /> {t("refreshStatus")}</button>
     </div>
     {statusMessage && statusAlert(statusMessage)}
     <div className="mt-8 grid gap-4 sm:grid-cols-3">
-      <StatCard icon={ShoppingBag} label="Total orders" value={String(orders.length)} trend={orders.length ? "Full purchase history" : "Your first order is waiting"} />
-      <StatCard icon={Truck} label="Active deliveries" value={String(activeOrders.length)} trend="Realtime status enabled" />
-      <StatCard icon={Heart} label="Favourite products" value={String(savedProductIds.length)} trend="Synced favourites" />
+      <StatCard icon={ShoppingBag} label={t("totalOrders")} value={String(orders.length)} trend={orders.length ? t("fullPurchaseHistory") : t("firstOrderWaiting")} />
+      <StatCard icon={Truck} label={t("activeDeliveries")} value={String(activeOrders.length)} trend={t("realtimeStatus")} />
+      <StatCard icon={Heart} label={t("favouriteProductsLabel")} value={String(savedProductIds.length)} trend={t("syncedFavourites")} />
     </div>
     {loading ? <div className="py-20 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-brand" /></div> : orders.length ? (
       <div className="mt-8 space-y-5">{orders.map((o) => <OrderCard key={o.id} order={o} recurringOrders={recurringOrders} frequency={frequency} setFrequency={setFrequency} buyAgain={buyAgain} makeRecurring={makeRecurring} />)}</div>
-    ) : <div className="dashboard-card mt-8 rounded-xl py-16 text-center"><ShoppingBag className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-xl font-black">No orders yet</h3><p className="mt-2 text-sm text-gray-500">Products you purchase will appear here with live tracking.</p></div>}
-    {!!recentlyPurchased.length && <section className="dashboard-card mt-6 rounded-xl"><h3 className="font-black">Recently purchased</h3><p className="mt-1 text-xs text-gray-500">Quickly add individual favorites from previous orders.</p><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{recentlyPurchased.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-lg border border-line p-3"><div className="relative h-12 w-12 shrink-0 bg-white"><ProductImage src={item.productImage} alt={item.productName} fill className="object-contain" sizes="48px" /></div><div className="min-w-0 flex-1"><p className="truncate text-xs font-black">{item.productName}</p><button type="button" onClick={() => { const p = allProducts.find((c) => c.id === item.productId); if (p) addToCart(p); }} className="mt-1 text-xs font-black text-brand">Add to cart</button></div></div>)}</div></section>}
+    ) : <div className="dashboard-card mt-8 rounded-xl py-16 text-center"><ShoppingBag className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-xl font-black">{t("noOrdersYet")}</h3><p className="mt-2 text-sm text-gray-500">{t("noOrdersYetText")}</p></div>}
+    {!!recentlyPurchased.length && <section className="dashboard-card mt-6 rounded-xl"><h3 className="font-black">{t("recentlyPurchased")}</h3><p className="mt-1 text-xs text-gray-500">{t("recentlyPurchasedText")}</p><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{recentlyPurchased.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-lg border border-line p-3"><div className="relative h-12 w-12 shrink-0 bg-white"><ProductImage src={item.productImage} alt={item.productName} fill className="object-contain" sizes="48px" /></div><div className="min-w-0 flex-1"><p className="truncate text-xs font-black">{item.productName}</p><button type="button" onClick={() => { const p = allProducts.find((c) => c.id === item.productId); if (p) addToCart(p); }} className="mt-1 text-xs font-black text-brand">{t("addToCartShort")}</button></div></div>)}</div></section>}
   </>;
 }
 

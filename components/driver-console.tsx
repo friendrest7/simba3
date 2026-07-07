@@ -199,12 +199,11 @@ import { Settings } from "lucide-react";
 
 export function DriverConsoleWrapper() {
   const activeTool = useActiveTool();
+  const { t } = useStore();
 
   if (activeTool === "Settings") {
-    return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">Driver settings</h2><p className="mt-2 text-sm text-gray-500">Preferences and notification settings will appear here.</p></div>;
+    return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">{t("driverSettings")}</h2><p className="mt-2 text-sm text-gray-500">{t("driverSettingsText")}</p></div>;
   }
 
-  // "My route", "Deliveries", "Location reporting" all render the full console
-  // (the console itself contains all those views in one place)
   return <DriverConsole />;
 }

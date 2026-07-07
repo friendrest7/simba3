@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, ArrowUpRight, Building2, CheckCircle2, Download, Globe2, MapPin, Settings, ShieldCheck, ShoppingCart, TrendingUp, Truck, Users } from "lucide-react";
 import { DashboardShell, useActiveTool } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
+import { useStore } from "@/components/store-provider";
 
 const periods = { "This month": 1, Quarter: 2.92, "Full year": 11.45 } as const;
 
@@ -22,6 +23,7 @@ function usd(value: number) { return new Intl.NumberFormat("en-US", { style: "cu
 
 function CeoContent() {
   const activeTool = useActiveTool();
+  const { t } = useStore();
   const [period, setPeriod] = useState<keyof typeof periods>("This month");
   const [selectedRegion, setSelectedRegion] = useState("All Africa");
   const [notice, setNotice] = useState("");
@@ -95,7 +97,7 @@ function CeoContent() {
     <section className="dashboard-card mt-6 rounded-xl"><div className="flex items-center gap-2 mb-5"><ShieldCheck className="h-5 w-5 text-[#d94b1b]" /><h3 className="font-black">CEO attention queue</h3></div>{[["Ghana fulfilment", "90.7% service level requires recovery plan.", "Action"], ["Zambia store productivity", "Review sales per store against Southern Africa benchmark.", "Watch"], ["East Africa expansion", "Kenya and Tanzania growth support the next-site pipeline.", "Opportunity"]].map(([title, detail, status]) => <div key={title} className="flex gap-3 border-b border-black/5 pb-4 dark:border-white/5"><span className={`grid h-9 w-9 shrink-0 place-items-center rounded-md ${status === "Action" ? "bg-red-100 text-red-700" : status === "Watch" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>{status === "Opportunity" ? <TrendingUp className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}</span><div><p className="text-xs font-black">{title}</p><p className="mt-1 text-[11px] leading-5 text-gray-500">{detail}</p></div></div>)}</section>
   </>;
 
-  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">Executive settings</h2><p className="mt-2 text-sm text-gray-500">Platform configuration for executive access will appear here.</p></div>;
+  if (activeTool === "Settings") return <div className="dashboard-card rounded-xl py-16 text-center"><Settings className="mx-auto h-10 w-10 text-gray-400" /><h2 className="mt-4 text-xl font-black">{t("executiveSettings")}</h2><p className="mt-2 text-sm text-gray-500">{t("executiveSettingsText")}</p></div>;
 
   // Africa overview (default)
   return <>

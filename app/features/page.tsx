@@ -25,7 +25,7 @@ const groups = [
       "Relevance, price, and A-Z/Z-A sorting",
       "Product details, zoom gallery, quantity, wishlist, ratings, related carousel",
       "Persistent cart, RWF totals, quantity controls, and cart recommendations",
-      "MTN MoMo, Airtel Money, cash, delivery fees, time slots, confirmation, tracking",
+      "MTN MoMo, Airtel Money, cash, QR code payment (0796198326), delivery fees, time slots, confirmation, tracking",
     ],
   },
   {
@@ -87,6 +87,40 @@ export default function FeaturesPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg bg-canvas p-4"><b>Buyer / Customer</b><p className="mt-2 font-mono text-sm">buyer@test.com</p><p className="font-mono text-sm">password123</p><Link href="/signin" className="mt-3 inline-block font-black text-brand">Open buyer login</Link></div>
           <div className="rounded-lg bg-canvas p-4"><b>Market Rep / Admin</b><p className="mt-2 font-mono text-sm">admin@test.com</p><p className="font-mono text-sm">admin123</p><Link href="/signin" className="mt-3 inline-block font-black text-brand">Open admin login</Link></div>
+        </div>
+      </section>
+
+      {/* Sign-in gate notice */}
+      <section className="mt-5 rounded-xl border border-amber-300/60 bg-amber-50/60 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 text-xl">🔒</span>
+          <div>
+            <h2 className="font-black text-amber-900 dark:text-amber-300">Account required to checkout</h2>
+            <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-400">
+              Placing orders, tracking deliveries, and paying with QR code or mobile money all require a
+              Simba account. Use the test credentials above or{" "}
+              <Link href="/signup" className="font-bold underline">create a free account</Link> to try the full checkout flow.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* QR code payment panel */}
+      <section className="mt-5 rounded-xl border border-[#16865c]/30 bg-[#16865c]/5 p-5">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 text-xl">📲</span>
+          <div>
+            <h2 className="font-black text-[#16865c]">QR Code payment — 0796198326</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Simba now supports QR code checkout. Select <strong>QR Code</strong> as your payment method at
+              checkout — a scannable code linked to Simba&apos;s store number{" "}
+              <strong className="text-ink">0796 198 326</strong> is displayed instantly. Scan with MTN MoMo
+              or Airtel Money to complete payment in seconds.
+            </p>
+            <Link href="/checkout" className="mt-3 inline-flex items-center gap-1 font-black text-[#16865c] text-sm">
+              Try QR checkout →
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -1,8 +1,18 @@
 import Image from "next/image";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
+import { createClient } from "@/lib/supabase/server";
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) redirect("/dashboard/client");
+  } catch {
+    // Supabase not configured — allow the page to render
+  }
+
   return (
     <div className="grid min-h-[760px] lg:grid-cols-2">
       <div className="relative hidden lg:block">
@@ -15,4 +25,3 @@ export default function SignUpPage() {
     </div>
   );
 }
-
