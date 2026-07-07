@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BarChart3, Boxes, CheckCircle2, Loader2, Plus, RefreshCw, Settings, ShoppingCart, Store, TrendingUp, Truck, Users, X } from "lucide-react";
 import { DashboardShell, useActiveTool } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
@@ -149,7 +149,7 @@ function ProductsSection() {
         ))}
       </div>
     ) : (
-      <div className="dashboard-card mt-6 rounded-xl py-16 text-center"><Boxes className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-lg font-black">No products added yet</h3><p className="mt-2 text-sm text-gray-500">Click "Add product" to publish your first item to the store.</p></div>
+      <div className="dashboard-card mt-6 rounded-xl py-16 text-center"><Boxes className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-4 text-lg font-black">No products added yet</h3><p className="mt-2 text-sm text-gray-500">Click &quot;Add product&quot; to publish your first item to the store.</p></div>
     )}
   </>;
 }

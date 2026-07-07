@@ -69,8 +69,6 @@ export function CheckoutClient() {
   const [paymentChecking, setPaymentChecking] = useState(false);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [error, setError] = useState("");
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [qrLoading, setQrLoading] = useState(false);
   // Distance-based delivery
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "ok" | "denied">("idle");
   const [clientCoords, setClientCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -201,17 +199,15 @@ export function CheckoutClient() {
   }
 
   async function fetchQrCode(checkout: CheckoutResult) {
-    setQrLoading(true);
     try {
       const url = `/api/qr-payment?orderId=${encodeURIComponent(checkout.orderId)}&amount=${encodeURIComponent(checkout.totalRwf)}&orderNumber=${encodeURIComponent(checkout.orderNumber)}`;
       const response = await fetch(url);
       const data = await response.json().catch(() => null);
-      if (data?.qrDataUrl) setQrDataUrl(data.qrDataUrl);
-      else setError("Could not generate QR code. Your order is confirmed — please contact the store.");
+      if (!data?.qrDataUrl) {
+        setError("Could not generate QR code. Your order is confirmed — please contact the store.");
+      }
     } catch {
       setError("Could not generate QR code. Your order is confirmed — please contact the store.");
-    } finally {
-      setQrLoading(false);
     }
   }
 

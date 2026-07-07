@@ -1,6 +1,6 @@
 "use client";
 
-import { Flame, Gift, ShoppingCart, Star, TrendingUp, Zap } from "lucide-react";
+import { Flame, Gift, ShoppingCart, TrendingUp, Zap } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/data";
 import { useStore } from "@/components/store-provider";

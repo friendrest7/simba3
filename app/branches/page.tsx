@@ -108,11 +108,7 @@ function getDirectionsUrl(branch: Branch) {
 }
 
 /** Build a Google Maps embed URL showing all branches */
-function buildMapEmbedUrl(selected: Branch | null, userLat?: number, userLng?: number) {
-  // Centre on selected branch or Kigali centre
-  const centre = selected
-    ? `${selected.lat},${selected.lng}`
-    : "-1.9536,30.0606";
+function buildMapEmbedUrl(selected: Branch | null) {
   const zoom = selected ? 15 : 13;
   const query = selected ? selected.mapQuery : "Simba+Supermarket+Kigali";
   return `https://maps.google.com/maps?q=${query}&t=m&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
@@ -120,26 +116,27 @@ function buildMapEmbedUrl(selected: Branch | null, userLat?: number, userLng?: n
 
 export default function BranchesPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locating, setLocating] = useState(false);
+  const [locating, setLocating] = useState(() => typeof window !== "undefined" && "geolocation" in navigator);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
 
   // Auto-request location on mount
   useEffect(() => {
-    if (typeof window !== "undefined" && "geolocation" in navigator) {
-      setLocating(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setLocating(false);
-        },
-        () => {
-          setLocationError("Location access denied. Distances unavailable.");
-          setLocating(false);
-        },
-        { timeout: 8000 }
-      );
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => {
+        setLocationError("Location access denied. Distances unavailable.");
+        setLocating(false);
+      },
+      { timeout: 8000 }
+    );
   }, []);
 
   function requestLocation() {
@@ -169,7 +166,7 @@ export default function BranchesPage() {
 
   const nearestBranch = userLocation ? sortedBranches[0] : null;
 
-  const mapEmbedUrl = buildMapEmbedUrl(selectedBranch, userLocation?.lat, userLocation?.lng);
+  const mapEmbedUrl = buildMapEmbedUrl(selectedBranch);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-8">

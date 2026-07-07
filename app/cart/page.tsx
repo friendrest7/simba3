@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Bookmark, BookmarkCheck, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useStore } from "@/components/store-provider";
 import { Price } from "@/components/price";
 import { ProductImage } from "@/components/product-image";
@@ -13,8 +13,7 @@ export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, saveForLater, savedForLater, moveToCart, removeFromSaved, t } = useStore();
   const [confirmClear, setConfirmClear] = useState(false);
   // Prevent empty-cart flash before localStorage hydrates on client
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [mounted] = useState(() => typeof window !== "undefined");
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const delivery = subtotal >= 40 || subtotal === 0 ? 0 : 5.9;

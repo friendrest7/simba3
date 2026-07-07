@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2, QrCode, Smartphone } from "lucide-react";
 
@@ -47,7 +48,7 @@ export function SimbaQrPanel({ compact = false }: { compact?: boolean }) {
               QR unavailable
             </span>
           ) : (
-            <img
+            <Image
               src={qrDataUrl!}
               alt="Simba store payment QR code"
               className="h-40 w-40 rounded-xl border border-[#16865c]/20 shadow-sm"
@@ -88,7 +89,7 @@ export function SimbaQrPanel({ compact = false }: { compact?: boolean }) {
             QR code unavailable. Please contact the store.
           </span>
         ) : (
-          <img
+          <Image
             src={qrDataUrl!}
             alt="Simba store payment QR code — scan to pay"
             className="h-56 w-56 rounded-2xl border-2 border-[#16865c]/30 shadow-md"
