@@ -95,10 +95,22 @@ export function Header() {
         </form>
 
         <nav className="ml-auto flex items-center gap-1 sm:gap-2">
-          <Link href={accountHref} className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-            <UserRound />
-            <span>{accountLabel}</span>
-          </Link>
+          {user ? (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+              title={t("signout")}
+            >
+              <UserRound />
+              <span>{t("signout")}</span>
+            </button>
+          ) : (
+            <Link href={accountHref} className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
+              <UserRound />
+              <span>{accountLabel}</span>
+            </Link>
+          )}
           <Link href="/cart" className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
