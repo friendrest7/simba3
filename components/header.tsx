@@ -78,23 +78,42 @@ export function Header() {
           {t("allCategories")}
         </Link>
 
-        <form onSubmit={submitSearch} className="relative hidden min-w-0 flex-1 md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/55" />
+        <form onSubmit={submitSearch} className="relative hidden min-w-0 w-36 shrink-0 md:block lg:w-44">
+          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-ink/55" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("search")}
-            className="h-9 w-full rounded-md border-2 border-brand bg-white pl-9 pr-11 text-xs font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand/20"
+            className="h-7 w-full rounded-md border border-brand bg-white pl-6 pr-8 text-[10px] font-semibold text-ink outline-none transition placeholder:text-muted focus:ring-2 focus:ring-brand/20"
           />
           <button
-            className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-md bg-brand text-white shadow-sm transition hover:bg-brand/90"
+            className="absolute right-0.5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded bg-brand text-white shadow-sm transition hover:bg-brand/90"
             aria-label={t("searchProducts")}
           >
-            <Search className="h-3 w-3" />
+            <Search className="h-2.5 w-2.5" />
           </button>
         </form>
 
         <nav className="ml-auto flex items-center gap-1">
+          {/* Language selector — always visible on lg+ */}
+          <label className="hidden h-7 cursor-pointer items-center gap-1 rounded-md border border-brand/30 bg-white px-1.5 text-ink lg:flex dark:border-white/15 dark:bg-white/10 dark:text-white" title="Language">
+            <Languages className="h-3 w-3 shrink-0 text-brand dark:text-white" />
+            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-[52px] bg-transparent text-[9px] font-black text-ink outline-none dark:text-white [&>option]:text-black">
+              {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
+            </select>
+          </label>
+
+          {/* Theme toggle — always visible on lg+ */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="hidden h-7 w-7 items-center justify-center rounded-md border border-brand/30 bg-white text-ink transition hover:bg-brand/10 lg:flex dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
+            title={theme === "light" ? t("darkMode") : t("lightMode")}
+          >
+            {theme === "light" ? <Moon className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
+          </button>
+
           {user ? (
             <button
               type="button"
@@ -115,21 +134,24 @@ export function Header() {
             <span className="relative"><ShoppingCart />{!!cartCount && <b className="action-count">{cartCount}</b>}</span>
             <span>{t("cart")}</span>
           </Link>
-          <label className="hidden h-8 cursor-pointer items-center gap-1 rounded-md border border-brand/25 bg-white px-2 text-ink xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white">
-            <Languages className="h-3 w-3" />
-            <select value={language} onChange={(event) => setLanguage(event.target.value as LanguageCode)} className="max-w-14 bg-transparent text-[9px] font-black text-ink outline-none dark:text-white [&>option]:text-black">
-              {languageCodes.map((code) => <option key={code} value={code}>{languageLabels[code]}</option>)}
-            </select>
-          </label>
           <button
             type="button"
-            onClick={toggleTheme}
-            className="hidden h-8 w-8 items-center justify-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 xl:flex dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-            aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
-            title={theme === "light" ? t("darkMode") : t("lightMode")}
+            onClick={() => setSecondaryNavOpen((value) => !value)}
+            className="hidden h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:grid dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            aria-label={secondaryNavOpen ? "Hide secondary navigation" : "Show secondary navigation"}
+            aria-expanded={secondaryNavOpen}
           >
-            {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${secondaryNavOpen ? "rotate-180" : ""}`} />
           </button>
+          <button
+            onClick={() => setMenuOpen((value) => !value)}
+            className="grid h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            aria-label={t("menu")}
+          >
+            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </nav>
+      </div>
           <button
             type="button"
             onClick={() => setSecondaryNavOpen((value) => !value)}
@@ -150,10 +172,15 @@ export function Header() {
       </div>
 
       <div className={`${secondaryNavOpen ? "hidden border-t border-brand/20 bg-white lg:block dark:border-white/15 dark:bg-[#231a10]" : "hidden"}`}>
+        {/* Top quick-links bar */}
         <div className="mx-auto flex h-9 max-w-[1500px] items-center gap-4 px-6 text-[11px] font-bold">
-          <Link href="/shop" className="rounded bg-white px-2 py-0.5 text-[10px] text-brand">{t("allCategories")}</Link>
+          <Link href="/shop" className="rounded bg-brand/10 px-2 py-0.5 text-[10px] font-black text-brand">{t("allCategories")}</Link>
           <Link href="/shop" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("marketplace")}</Link>
           <Link href="/promotions" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("deals")}</Link>
+          <Link href="/trending" className="flex items-center gap-1 font-black text-brand dark:text-brand">
+            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
+            Trending
+          </Link>
           <Link href="/dashboard/client" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("track")}</Link>
           <Link href="/shop?saved=true" className="text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">
             {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded bg-brand px-1 py-0.5 text-[8px] text-white">{savedProductIds.length}</span>}
@@ -166,6 +193,99 @@ export function Header() {
             </select>
           </label>
           {user && <Link onClick={() => setSecondaryNavOpen(false)} href={accountHref} className="font-black text-brand dark:text-white">{user.name.split(" ")[0]}</Link>}
+        </div>
+        {/* Rich nav panel with descriptions */}
+        <div className="border-t border-brand/10 dark:border-white/10">
+          <div className="mx-auto grid max-w-[1500px] grid-cols-4 gap-0 px-6 py-5">
+            <div>
+              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">Explore</p>
+              <div className="space-y-3">
+                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">🏪</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">About Simba</p>
+                    <p className="text-[10px] text-muted">Our story, mission &amp; values</p>
+                  </div>
+                </Link>
+                <Link href="/branches" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">📍</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Our Branches</p>
+                    <p className="text-[10px] text-muted">9 locations across Rwanda</p>
+                  </div>
+                </Link>
+                <Link href="/faq" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">❓</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">FAQ</p>
+                    <p className="text-[10px] text-muted">Quick answers to common questions</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            <div>
+              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">Shop</p>
+              <div className="space-y-3">
+                <Link href="/trending" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">🔥</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Trending Now</p>
+                    <p className="text-[10px] text-muted">Most-bought &amp; BOGO deals this week</p>
+                  </div>
+                </Link>
+                <Link href="/promotions" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">🏷️</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Deals &amp; Offers</p>
+                    <p className="text-[10px] text-muted">Flash sales, bundles &amp; discounts</p>
+                  </div>
+                </Link>
+                <Link href="/shop?saved=true" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">❤️</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Wishlist</p>
+                    <p className="text-[10px] text-muted">Your saved products{savedProductIds.length > 0 ? ` (${savedProductIds.length})` : ""}</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            <div>
+              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">My Orders</p>
+              <div className="space-y-3">
+                <Link href="/dashboard/client" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">📦</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Track Order</p>
+                    <p className="text-[10px] text-muted">Live driver location &amp; ETA</p>
+                  </div>
+                </Link>
+                <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">🔄</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Compare Products</p>
+                    <p className="text-[10px] text-muted">Side-by-side product comparison</p>
+                  </div>
+                </Link>
+                <Link href="/cart" onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-brand text-sm">🛒</span>
+                  <div>
+                    <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">Your Cart</p>
+                    <p className="text-[10px] text-muted">Review items &amp; checkout</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            <div className="rounded-xl bg-brand/5 p-4 dark:bg-white/5">
+              <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted">Contact Us</p>
+              <p className="text-[11px] font-black text-ink dark:text-white">Simba Supermarket Rwanda</p>
+              <a href="tel:+250796198326" className="mt-1 block text-[11px] font-bold text-brand hover:underline">📞 +250 796 198 326</a>
+              <p className="mt-1 text-[10px] text-muted">Mon–Sat · 8 AM – 9 PM</p>
+              <p className="mt-0.5 text-[10px] text-muted">Sun · 9 AM – 6 PM</p>
+              <Link href="/faq" onClick={() => setSecondaryNavOpen(false)} className="mt-3 inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[10px] font-black text-white hover:bg-brand/90">
+                Get Help →
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
