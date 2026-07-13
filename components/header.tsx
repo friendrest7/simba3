@@ -202,32 +202,16 @@ export function Header() {
       {/* ── Desktop dropdown panel ── */}
       {secondaryNavOpen && (
         <div className="border-t border-brand/20 bg-white/95 backdrop-blur dark:border-white/15 dark:bg-[#231a10]/95">
-          <div className="mx-auto grid max-w-[1500px] gap-4 px-6 py-5 lg:grid-cols-[1.15fr_0.85fr_0.85fr]">
-            <div className="rounded-2xl border border-brand/10 bg-brand/5 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Need help?</p>
-              <h3 className="mt-2 text-sm font-black text-ink dark:text-white">Fast support and order tracking</h3>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Reach our team quickly or jump straight to your order updates from the customer dashboard.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Link href="/faq" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center rounded-full bg-brand px-3 py-1.5 text-[10px] font-black text-white transition hover:bg-brand/90">
-                  Read FAQ
-                </Link>
-                <Link href="/dashboard/client" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center rounded-full border border-brand/20 bg-white px-3 py-1.5 text-[10px] font-black text-ink transition hover:bg-brand/10 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-                  Track order
-                </Link>
-              </div>
-            </div>
-
+          <div className="mx-auto grid max-w-[1500px] gap-4 px-6 py-5 lg:grid-cols-2">
             <div className="rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Explore more</p>
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {secondaryNavLinks.map(({ href, label, Icon }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setSecondaryNavOpen(false)}
-                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10"
                   >
                     <Icon className="h-4 w-4 text-brand dark:text-white" />
                     <span>{label}</span>
@@ -238,14 +222,14 @@ export function Header() {
 
             <div className="rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Continue shopping</p>
-              <div className="mt-3 space-y-2">
-                <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
                   Browse the full marketplace
                 </Link>
-                <Link href="/cart" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                <Link href="/cart" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
                   Review your cart
                 </Link>
-                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
                   Learn about Simba
                 </Link>
               </div>

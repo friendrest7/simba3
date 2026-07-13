@@ -178,19 +178,18 @@ export function HomeContent({
               </Link>
             )}
 
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  const event = new CustomEvent("simba:ask", { detail: "Show me fresh snacks under FRw 10,000" });
-                  window.dispatchEvent(event);
-                }}
-                className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-[12px] font-black text-white transition hover:bg-brand/90"
-                aria-label="Ask Simba AI"
-              >
-                <Sparkles className="h-4 w-4" />
-                Ask Simba AI
-              </button>
+            <div className="mt-4 rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Need help?</p>
+              <h3 className="mt-2 text-sm font-black text-ink dark:text-white">Fast support and order tracking</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">Reach our team quickly or jump straight to your order updates from the customer dashboard.</p>
+              <div className="mt-3 flex gap-2">
+                <Link href="/faq" className="inline-flex items-center gap-2 rounded-full bg-brand px-3 py-2 text-xs font-black text-white transition hover:bg-brand/90">Read FAQ</Link>
+                <Link href="/dashboard/client" className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-white px-3 py-2 text-xs font-black text-ink transition hover:bg-brand/10 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">Track order</Link>
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <SimbaChat />
             </div>
 
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
