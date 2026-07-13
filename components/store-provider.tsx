@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { AuthChangeEvent, Session, SupabaseClient, User as SupabaseUser } from "@supabase/supabase-js";
 import { branches, CurrencyCode, Product } from "@/lib/data";
 import { LanguageCode, languageCodes, translate } from "@/lib/i18n";
@@ -89,6 +89,18 @@ type StoreContextValue = {
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
+const accountSyncState = {
+  lastUserId: "",
+  lastSignature: "",
+  inFlight: false,
+  timer: 0 as number,
+};
+
+const accountLoadStateState = {
+  lastUserId: "",
+  inFlight: false,
+};
+
 function roleForUi(value: unknown): User["role"] {
   const role = String(value || "customer");
   if (role === "customer") return "client";
@@ -111,6 +123,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [managedProducts, setManagedProducts] = useState<Product[]>([]);
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const lastSyncedPayloadRef = useRef<{ userId: string; signature: string } | null>(null);
   const [accountStateReady, setAccountStateReady] = useState(false);
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [supabaseReady, setSupabaseReady] = useState(false);
@@ -221,6 +234,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready || !user || accountStateReady) return;
+    if (accountLoadStateState.inFlight && accountLoadStateState.lastUserId === user.id) return;
+
+    accountLoadStateState.inFlight = true;
+    accountLoadStateState.lastUserId = user.id;
+
     let active = true;
 
     async function loadAccountState() {
@@ -256,6 +274,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // Local state remains fully functional if the optional sync migration is unavailable.
       } finally {
+        accountLoadStateState.inFlight = false;
         if (active) setAccountStateReady(true);
       }
     }
@@ -268,18 +287,49 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [accountStateReady, ready, user]);
 
   useEffect(() => {
-    if (!ready || !user || !accountStateReady) return;
-    const timer = window.setTimeout(() => {
+    if (!ready || !user?.id || !accountStateReady) return;
+
+    const payload = {
+      cart: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+      wishlist: savedProductIds,
+    };
+    const signature = JSON.stringify(payload);
+    const lastSync = lastSyncedPayloadRef.current;
+
+    if (lastSync?.userId === user.id && lastSync.signature === signature) {
+      return;
+    }
+
+    if (accountSyncState.timer) {
+      window.clearTimeout(accountSyncState.timer);
+      accountSyncState.timer = 0;
+    }
+
+    accountSyncState.timer = window.setTimeout(() => {
+      accountSyncState.timer = 0;
+      const latestSync = lastSyncedPayloadRef.current;
+      if (latestSync?.userId === user.id && latestSync.signature === signature) {
+        return;
+      }
+
+      accountSyncState.inFlight = true;
+      lastSyncedPayloadRef.current = { userId: user.id, signature };
+
       void fetch("/api/account/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cart: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
-          wishlist: savedProductIds,
-        }),
+        body: JSON.stringify(payload),
+      }).catch(() => undefined).finally(() => {
+        accountSyncState.inFlight = false;
       });
-    }, 500);
-    return () => window.clearTimeout(timer);
+    }, 800);
+
+    return () => {
+      if (accountSyncState.timer) {
+        window.clearTimeout(accountSyncState.timer);
+        accountSyncState.timer = 0;
+      }
+    };
   }, [accountStateReady, cart, ready, savedProductIds, user]);
 
   useEffect(() => {

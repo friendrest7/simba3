@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Clock3, Headphones, MapPin, Search, ShieldCheck, ShoppingBasket, Sparkles, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { cleanSearchQuery } from "@/lib/product-search";
@@ -193,11 +193,47 @@ export function HomeContent({
       </section>
 
       <section className="mx-auto max-w-[1500px] px-5 py-14 text-ink sm:px-8 lg:px-10">
-        <form onSubmit={submitSearch} action="/shop" className="relative mb-8 flex w-full max-w-3xl items-center text-ink">
-          <Search className="input-icon z-10" />
-          <input name="q" className="form-input pl-11 pr-32" placeholder={t("search")} />
-          <button className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-brand px-5 py-2 text-xs font-black text-white transition hover:opacity-90">{t("searchProducts")}</button>
-        </form>
+        <div className="mb-8 overflow-hidden rounded-[28px] border border-brand/15 bg-gradient-to-br from-[#fff4d2] via-white to-[#ffe7b3] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:p-8 lg:p-10">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-brand">
+                <Sparkles className="h-3.5 w-3.5" />
+                Fresh picks this week
+              </div>
+              <h2 className="mt-4 text-2xl font-black leading-tight text-ink sm:text-3xl">
+                Speedy delivery, premium essentials, and surprise savings in one place.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted sm:text-base">
+                Discover fast-moving favourites, family bundles and handpicked deals designed to make weekly shopping feel effortless.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/promotions" className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-black text-white transition hover:bg-brand/90">
+                  Explore deals <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/trending" className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-white px-4 py-2 text-sm font-black text-ink transition hover:bg-brand/10">
+                  See trending items
+                </Link>
+              </div>
+            </div>
+            <div className="rounded-[24px] border border-brand/10 bg-white/80 p-4 shadow-sm backdrop-blur">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { icon: BadgeCheck, title: "Trusted quality", text: "Carefully chosen essentials and daily favourites." },
+                  { icon: Clock3, title: "Fast turnaround", text: "Reliable delivery windows from our local branches." },
+                  { icon: Truck, title: "Branch-first stock", text: "Your selected branch keeps things accurate and fresh." },
+                  { icon: ShieldCheck, title: "Secure checkout", text: "Smooth, protected payments for every order." },
+                ].map(({ icon: Icon, title, text }) => (
+                  <div key={title} className="rounded-2xl border border-line bg-canvas/70 p-3">
+                    <Icon className="h-5 w-5 text-brand" />
+                    <h3 className="mt-2 font-black text-ink">{title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-end justify-between gap-4">
           <div>
             <span className="eyebrow">{t("shopCategories")}</span>

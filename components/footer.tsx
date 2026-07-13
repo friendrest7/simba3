@@ -16,37 +16,34 @@ export function Footer() {
   const { t } = useStore();
   const groups = [
     {
-      title: t("shop"),
+      title: "Popular",
       links: [
-        [t("marketplace"), "/shop"],
         ["Trending 🔥", "/trending"],
-        [t("deals"), "/promotions"],
         [t("wishlist"), "/shop?saved=true"],
+        [t("deals"), "/promotions"],
+      ],
+    },
+    {
+      title: "Explore",
+      links: [
+        ["Our Branches", "/branches"],
+        ["About Simba", "/about"],
+        ["FAQ", "/faq"],
       ],
     },
     {
       title: t("account"),
       links: [
-        [t("signup"), "/signup"],
         [t("signin"), "/signin"],
-        [t("cart"), "/cart"],
-        [t("checkout"), "/checkout"],
-      ],
-    },
-    {
-      title: t("help"),
-      links: [
-        ["FAQ", "/faq"],
-        ["Our Branches", "/branches"],
-        ["About Simba", "/about"],
-        [t("track"), "/dashboard/client"],
+        [t("signup"), "/signup"],
+        ["My Account", "/account"],
       ],
     },
   ];
 
   return (
-    <footer className="bg-brand text-white">
-      <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:px-10">
+    <footer className="bg-gradient-to-br from-[#b07a00] via-brand to-[#7d5400] text-white shadow-[0_-20px_60px_rgba(0,0,0,0.16)]">
+      <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.5fr_0.8fr_0.8fr_0.9fr_1.1fr] lg:px-10">
         {/* Brand column */}
         <div className="max-w-sm">
           <Logo inverse />
@@ -64,12 +61,14 @@ export function Footer() {
         {/* Link groups */}
         {groups.map((group) => (
           <div key={group.title}>
-            <h3 className="mb-4 text-xs font-black uppercase tracking-widest text-white/40">{group.title}</h3>
-            {group.links.map(([label, href]) => (
-              <Link key={label} href={href} className="mb-2.5 block text-sm text-white/65 transition hover:text-white">
-                {label}
-              </Link>
-            ))}
+            <h3 className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-white/45">{group.title}</h3>
+            <div className="space-y-2.5">
+              {group.links.map(([label, href]) => (
+                <Link key={label} href={href} className="block text-sm text-white/70 transition hover:text-white hover:translate-x-0.5">
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         ))}
 

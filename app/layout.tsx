@@ -37,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"))}`,
+            __html: `const isLocalhost=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);if("serviceWorker" in navigator){if(isLocalhost){window.addEventListener("load",()=>navigator.serviceWorker.getRegistrations().then((registrations)=>Promise.all(registrations.map((registration)=>registration.unregister()))).catch(()=>undefined))}else{window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>undefined))}}`,
           }}
         />
         <div

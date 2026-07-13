@@ -182,138 +182,46 @@ export function Header() {
 
       {/* ── Desktop dropdown panel ── */}
       {secondaryNavOpen && (
-        <div className="border-t border-brand/20 bg-white dark:border-white/15 dark:bg-[#231a10]">
-          {/* Quick-links bar */}
-          <div className="mx-auto flex h-9 max-w-[1500px] items-center gap-4 overflow-x-auto px-6 text-[11px] font-bold">
-            <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 rounded bg-brand/10 px-2 py-0.5 text-[10px] font-black text-brand">{t("allCategories")}</Link>
-            <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("marketplace")}</Link>
-            <Link href="/promotions" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("deals")}</Link>
-            <Link href="/trending" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 flex items-center gap-1 font-black text-brand">
-              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
-              Trending
-            </Link>
-            <Link href="/dashboard/client" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">{t("track")}</Link>
-            <Link href="/shop?saved=true" onClick={() => setSecondaryNavOpen(false)} className="shrink-0 text-ink/75 hover:text-ink dark:text-white/90 dark:hover:text-white">
-              {t("wishlist")}{!!savedProductIds.length && <span className="ml-1 rounded bg-brand px-1 py-0.5 text-[8px] text-white">{savedProductIds.length}</span>}
-            </Link>
-            <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-1.5 rounded border border-brand/20 bg-brand/5 px-2 py-1 text-ink/75 dark:border-white/20 dark:bg-white/10 dark:text-white/80">
-              <MapPin className="h-3 w-3 text-brand dark:text-white" />
-              <select
-                value={selectedBranchId}
-                onChange={(e) => setSelectedBranchId(e.target.value)}
-                className="bg-transparent text-[10px] font-bold text-ink outline-none dark:text-white [&>option]:text-black"
-              >
-                {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
-            </label>
-            {user && (
-              <Link onClick={() => setSecondaryNavOpen(false)} href={accountHref} className="shrink-0 font-black text-brand dark:text-white">
-                {user.name.split(" ")[0]}
-              </Link>
-            )}
-          </div>
-
-          {/* Rich 4-column panel */}
-          <div className="border-t border-brand/10 dark:border-white/10">
-            <div className="mx-auto grid max-w-[1500px] grid-cols-4 gap-0 px-6 py-5">
-
-              {/* Explore */}
-              <div>
-                <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">Explore</p>
-                <div className="space-y-3">
-                  {[
-                    { href: "/about", emoji: "🏪", title: "About Simba", sub: "Our story, mission & values" },
-                    { href: "/branches", emoji: "📍", title: "Our Branches", sub: "9 locations across Rwanda" },
-                    { href: "/faq", emoji: "❓", title: "FAQ", sub: "Quick answers to common questions" },
-                  ].map(({ href, emoji, title, sub }) => (
-                    <Link key={href} href={href} onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
-                      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-sm">{emoji}</span>
-                      <div>
-                        <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">{title}</p>
-                        <p className="text-[10px] text-muted">{sub}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+        <div className="border-t border-brand/20 bg-white/95 backdrop-blur dark:border-white/15 dark:bg-[#231a10]/95">
+          <div className="mx-auto grid max-w-[1500px] gap-4 px-6 py-5 lg:grid-cols-[1.15fr_0.85fr_0.85fr]">
+            <div className="rounded-2xl border border-brand/10 bg-brand/5 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Need help?</p>
+              <h3 className="mt-2 text-sm font-black text-ink dark:text-white">Fast support and order tracking</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Reach our team quickly or jump straight to your order updates from the customer dashboard.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href="/faq" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center rounded-full bg-brand px-3 py-1.5 text-[10px] font-black text-white transition hover:bg-brand/90">
+                  Read FAQ
+                </Link>
+                <Link href="/dashboard/client" onClick={() => setSecondaryNavOpen(false)} className="inline-flex items-center rounded-full border border-brand/20 bg-white px-3 py-1.5 text-[10px] font-black text-ink transition hover:bg-brand/10 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
+                  Track order
+                </Link>
               </div>
+            </div>
 
-              {/* Shop */}
-              <div>
-                <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">Shop</p>
-                <div className="space-y-3">
-                  {[
-                    { href: "/trending", emoji: "🔥", title: "Trending Now", sub: "Most-bought & BOGO deals this week" },
-                    { href: "/promotions", emoji: "🏷️", title: "Deals & Offers", sub: "Flash sales, bundles & discounts" },
-                    { href: "/shop?saved=true", emoji: "❤️", title: "Wishlist", sub: `Your saved products${savedProductIds.length > 0 ? ` (${savedProductIds.length})` : ""}` },
-                  ].map(({ href, emoji, title, sub }) => (
-                    <Link key={href} href={href} onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
-                      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-sm">{emoji}</span>
-                      <div>
-                        <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">{title}</p>
-                        <p className="text-[10px] text-muted">{sub}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+            <div className="rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Visit us</p>
+              <div className="mt-3 space-y-2">
+                <Link href="/branches" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                  Find a branch nearby
+                </Link>
+                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                  Learn about Simba
+                </Link>
               </div>
+            </div>
 
-              {/* My Orders */}
-              <div>
-                <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">My Orders</p>
-                <div className="space-y-3">
-                  {[
-                    { href: "/dashboard/client", emoji: "📦", title: "Track Order", sub: "Live driver location & ETA" },
-                    { href: "/shop", emoji: "🔄", title: "Compare Products", sub: "Side-by-side product comparison" },
-                    { href: "/cart", emoji: "🛒", title: "Your Cart", sub: "Review items & checkout" },
-                  ].map(({ href, emoji, title, sub }) => (
-                    <Link key={title} href={href} onClick={() => setSecondaryNavOpen(false)} className="group flex items-start gap-3">
-                      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand/10 text-sm">{emoji}</span>
-                      <div>
-                        <p className="text-[11px] font-black text-ink group-hover:text-brand dark:text-white">{title}</p>
-                        <p className="text-[10px] text-muted">{sub}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+            <div className="rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Continue shopping</p>
+              <div className="mt-3 space-y-2">
+                <Link href="/shop" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                  Browse the full marketplace
+                </Link>
+                <Link href="/cart" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                  Review your cart
+                </Link>
               </div>
-
-              {/* Contact + Theme/Language controls */}
-              <div className="space-y-3">
-                <div className="rounded-xl bg-brand/5 p-4 dark:bg-white/5">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted">Contact Us</p>
-                  <p className="text-[11px] font-black text-ink dark:text-white">Simba Supermarket Rwanda</p>
-                  <a href="tel:+250796198326" className="mt-1 block text-[11px] font-bold text-brand hover:underline">📞 +250 796 198 326</a>
-                  <p className="mt-1 text-[10px] text-muted">Mon–Sat · 8 AM – 9 PM</p>
-                  <p className="text-[10px] text-muted">Sun · 9 AM – 6 PM</p>
-                  <Link href="/faq" onClick={() => setSecondaryNavOpen(false)} className="mt-3 inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[10px] font-black text-white hover:bg-brand/90">
-                    Get Help →
-                  </Link>
-                </div>
-
-                {/* Quick theme + language in dropdown */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={toggleTheme}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 text-[10px] font-black text-ink hover:bg-brand/10 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-                  >
-                    {theme === "light" ? <><Moon className="h-3.5 w-3.5" /> Dark</> : <><Sun className="h-3.5 w-3.5" /> Light</>}
-                  </button>
-                  <label className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-brand/20 bg-brand/5 px-2 py-2 text-[10px] font-black text-ink hover:bg-brand/10 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-                    <Languages className="h-3.5 w-3.5 text-brand dark:text-white" />
-                    <select
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-                      className="w-12 bg-transparent text-[10px] font-black text-ink outline-none dark:text-white [&>option]:text-black"
-                    >
-                      {languageCodes.map((code) => (
-                        <option key={code} value={code}>{languageLabels[code]}</option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
