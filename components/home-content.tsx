@@ -163,10 +163,10 @@ export function HomeContent({
             <span className="inline-flex rounded-full border border-line bg-canvas px-2.5 py-1 text-[8px] font-black uppercase tracking-[.14em] text-brand">
               {t("heroEyebrow")}
             </span>
-            <h1 className="mt-3 whitespace-pre-line text-xl font-black italic leading-[1.08] tracking-[-.02em] text-ink sm:text-2xl">
+            <h1 className="mt-3 whitespace-pre-line text-xl font-black leading-[1.08] tracking-[-.02em] text-ink sm:text-2xl">
               {t("heroTitle")}
             </h1>
-            <p className="mt-2 text-[9px] italic leading-4 text-muted sm:text-[10px]">{t("heroText")}</p>
+            <p className="mt-2 text-[9px] leading-4 text-muted sm:text-[10px]">{t("heroText")}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href="/shop" className="button-primary !min-h-9 !px-3 !text-[10px]">{t("startShopping")} <ArrowRight className="h-3 w-3" /></Link>
               <Link href="/shop?category=Simba%20Favourites" className="button-secondary !min-h-9 !px-3 !text-[10px]">{t("seeFavourites")}</Link>
