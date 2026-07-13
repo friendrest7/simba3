@@ -10,6 +10,7 @@ import { useStore } from "@/components/store-provider";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/data";
 import { FAQAccordion } from "@/components/faq-accordion";
+import { SimbaChat } from "@/components/simba-chat";
 import happyShopperImage from "@/landing/happy-shopper.jpg";
 import applesImage from "@/landing/pixabay-apples.jpg";
 import beveragesImage from "@/landing/pixabay-beverages.jpg";
@@ -176,6 +177,33 @@ export function HomeContent({
                 {t("signin")}
               </Link>
             )}
+
+            <div className="mt-4 rounded-2xl border border-brand/15 bg-gradient-to-br from-brand/10 via-white to-brand/5 p-3 shadow-sm dark:border-white/10 dark:from-white/10 dark:via-[#1e1409] dark:to-white/5">
+              <div className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-white">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">Ask Simba AI</p>
+                  <p className="text-sm font-black text-ink dark:text-white">Find the right item faster</p>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] leading-5 text-muted">
+                Try a prompt like “show me fresh snacks under FRw 10,000” and let Simba AI help you discover the best picks.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const event = new CustomEvent("simba:ask", { detail: "Show me fresh snacks under FRw 10,000" });
+                  window.dispatchEvent(event);
+                }}
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-3 py-2 text-[10px] font-black text-white transition hover:bg-brand/90"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Ask Simba AI
+              </button>
+            </div>
+
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
               {[
                 ["789", t("productsReady")],

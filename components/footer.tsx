@@ -18,7 +18,6 @@ export function Footer() {
     {
       title: "Popular",
       links: [
-        ["Trending 🔥", "/trending"],
         [t("wishlist"), "/shop?saved=true"],
         [t("deals"), "/promotions"],
       ],
