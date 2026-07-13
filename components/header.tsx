@@ -68,9 +68,8 @@ export function Header() {
     : `/signin?next=${encodeURIComponent(pathname)}`;
   const accountLabel = user ? user.name.split(" ")[0] : t("account");
 
-  const quickLinks = [
+  const secondaryNavLinks = [
     { href: "/shop", label: t("marketplace"), Icon: Store },
-    { href: "/trending", label: "Trending", Icon: Flame },
     { href: "/promotions", label: t("deals"), Icon: BadgePercent },
     { href: "/branches", label: "Branches", Icon: MapPin },
     { href: "/faq", label: "FAQ", Icon: CircleHelp },
@@ -93,18 +92,13 @@ export function Header() {
           {t("allCategories")}
         </Link>
 
-        <div className="hidden items-center gap-1.5 xl:flex">
-          {quickLinks.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="inline-flex h-8 items-center gap-2 rounded-full border border-brand/20 bg-white/80 px-3 text-[11px] font-black text-ink transition hover:border-brand hover:bg-brand/10 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-            >
-              <Icon className="h-3.5 w-3.5 text-brand dark:text-white" />
-              <span>{label}</span>
-            </Link>
-          ))}
-        </div>
+        <Link
+          href="/trending"
+          className="hidden h-8 shrink-0 items-center gap-2 rounded-full border border-brand/20 bg-white/80 px-3 text-[11px] font-black text-ink transition hover:border-brand hover:bg-brand/10 lg:inline-flex dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+        >
+          <Flame className="h-3.5 w-3.5 text-brand dark:text-white" />
+          <span>Trending</span>
+        </Link>
 
         {/* Search bar — takes all available middle space, matches shop style */}
         <form onSubmit={submitSearch} className="relative hidden flex-1 md:flex md:items-center">
@@ -226,14 +220,19 @@ export function Header() {
             </div>
 
             <div className="rounded-2xl border border-brand/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#22180e]">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Visit us</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted">Explore more</p>
               <div className="mt-3 space-y-2">
-                <Link href="/branches" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
-                  Find a branch nearby
-                </Link>
-                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
-                  Learn about Simba
-                </Link>
+                {secondaryNavLinks.map(({ href, label, Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setSecondaryNavOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10"
+                  >
+                    <Icon className="h-4 w-4 text-brand dark:text-white" />
+                    <span>{label}</span>
+                  </Link>
+                ))}
               </div>
             </div>
 
@@ -245,6 +244,9 @@ export function Header() {
                 </Link>
                 <Link href="/cart" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
                   Review your cart
+                </Link>
+                <Link href="/about" onClick={() => setSecondaryNavOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-brand/5 dark:text-white dark:hover:bg-white/10">
+                  Learn about Simba
                 </Link>
               </div>
             </div>
