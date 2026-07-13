@@ -17,7 +17,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { branches } from "@/lib/data";
+import { branches, getBranchRecommendations } from "@/lib/data";
 import { deliveryTimeSlots, distanceBasedFee, distanceEstimatedHours, haversineKm } from "@/lib/delivery";
 import { useStore } from "./store-provider";
 import { OrderInvoice } from "./order-invoice";
@@ -74,6 +74,10 @@ export function CheckoutClient() {
   const [clientCoords, setClientCoords] = useState<{ lat: number; lng: number } | null>(null);
   const selectedBranch = branches.find((branch) => branch.id === selectedBranchId) || branches[0];
   const subtotalRwf = cart.reduce((sum, item) => sum + Math.round(item.product.price * 1450) * item.quantity, 0);
+  const branchRecommendations = useMemo(() => {
+    if (!cart.length) return [];
+    return getBranchRecommendations(cart[0].product, selectedBranchId);
+  }, [cart, selectedBranchId]);
 
   const distanceKm = useMemo(() => {
     if (!clientCoords || fulfilment === "pickup") return null;
@@ -370,7 +374,18 @@ export function CheckoutClient() {
               <button type="button" onClick={() => setFulfilment("pickup")} className={`flex min-h-24 items-center gap-4 rounded-lg border p-4 text-left ${fulfilment === "pickup" ? "border-brand bg-brand/5" : "border-line"}`}><Store className="h-6 w-6 text-brand" /><span><b className="block">Branch pickup</b><small className="mt-1 block text-muted">Free collection</small></span></button>
             </div>
             {fulfilment === "pickup" ? (
-              <div className="mt-5"><label className="form-label">Collection branch</label><select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="form-input">{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}</select><p className="mt-2 text-xs text-muted">{selectedBranch.address}</p></div>
+              <div className="mt-5">
+                <label className="form-label">Collection branch</label>
+                <select value={selectedBranchId} onChange={(event) => setSelectedBranchId(event.target.value)} className="form-input">
+                  {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} - {branch.city}</option>)}
+                </select>
+                {branchRecommendations.length > 0 && (
+                  <p className="mt-2 text-xs text-muted">
+                    {branchRecommendations.find((item) => item.branch.id === selectedBranchId)?.reason || "Nearest available option"}
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-muted">{selectedBranch.address}</p>
+              </div>
             ) : (
               <div className="mt-5 space-y-4">
                 {/* Geolocation */}

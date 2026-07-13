@@ -122,6 +122,50 @@ export function getBranchStock(product: Product, branchId: string) {
   return Math.max(2, Math.round(product.stock * branchWeight * (0.72 + (seed % 22) / 100)));
 }
 
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const deltaLat = toRad(lat2 - lat1);
+  const deltaLng = toRad(lng2 - lng1);
+  const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(deltaLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Number((6371 * c).toFixed(1));
+}
+
+export type BranchRecommendation = {
+  branch: Branch;
+  stock: number;
+  distanceKm: number;
+  isSelected: boolean;
+  isAvailable: boolean;
+  reason: string;
+};
+
+export function getBranchRecommendations(product: Product, selectedBranchId: string) {
+  const selectedBranch = branches.find((branch) => branch.id === selectedBranchId) || branches[0];
+
+  return branches
+    .map((branch) => {
+      const stock = getBranchStock(product, branch.id);
+      const distanceKm = haversineKm(selectedBranch.coordinates.lat, selectedBranch.coordinates.lng, branch.coordinates.lat, branch.coordinates.lng);
+      const isSelected = branch.id === selectedBranchId;
+      const isAvailable = stock > 0;
+      let reason = isAvailable ? `Available · ${distanceKm.toFixed(1)} km away` : `Out of stock · ${distanceKm.toFixed(1)} km away`;
+      if (isSelected) reason = isAvailable ? "Current selection" : "Current selection · out of stock";
+
+      return { branch, stock, distanceKm, isSelected, isAvailable, reason } satisfies BranchRecommendation;
+    })
+    .sort((left, right) => {
+      if (left.isSelected !== right.isSelected) return left.isSelected ? -1 : 1;
+      if (left.isAvailable !== right.isAvailable) return left.isAvailable ? -1 : 1;
+      if (left.stock !== right.stock) return right.stock - left.stock;
+      return left.distanceKm - right.distanceKm;
+    });
+}
+
+export function getRecommendedBranchForProduct(product: Product, selectedBranchId: string) {
+  return getBranchRecommendations(product, selectedBranchId).find((item) => item.isAvailable) || null;
+}
+
 export const categories = [
   { name: "Fresh fruit", image: "/images/5.jpg", count: "240+ products", query: "Fruits" },
   { name: "Vegetables", image: "/images/16.jpg", count: "180+ products", query: "Vegetables" },
