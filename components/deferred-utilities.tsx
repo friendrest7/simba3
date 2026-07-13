@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 const CartAddedPanel = dynamic(() => import("./cart-added-panel").then((module) => module.CartAddedPanel), { ssr: false });
 const MobileCartBar = dynamic(() => import("./mobile-cart-bar").then((module) => module.MobileCartBar), { ssr: false });
 const PageTranslator = dynamic(() => import("./page-translator").then((module) => module.PageTranslator), { ssr: false });
-const SimbaChat = dynamic(() => import("./simba-chat").then((module) => module.SimbaChat), { ssr: false });
 const ThemePanel = dynamic(() => import("./theme-panel").then((module) => module.ThemePanel), { ssr: false });
 
 export function DeferredUtilities() {
@@ -22,7 +21,6 @@ export function DeferredUtilities() {
     <PageTranslator />
     <CartAddedPanel />
     <MobileCartBar />
-    <SimbaChat />
     <ThemePanel />
   </>;
 }
