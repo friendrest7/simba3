@@ -10,7 +10,6 @@ import { useStore } from "@/components/store-provider";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/data";
 import { FAQAccordion } from "@/components/faq-accordion";
-import { SimbaChat } from "@/components/simba-chat";
 import happyShopperImage from "@/landing/happy-shopper.jpg";
 import applesImage from "@/landing/pixabay-apples.jpg";
 import beveragesImage from "@/landing/pixabay-beverages.jpg";
@@ -188,9 +187,7 @@ export function HomeContent({
               </div>
             </div>
 
-            <div className="mt-3">
-              <SimbaChat />
-            </div>
+            {/* Chat removed from panel per request — global assistant remains elsewhere */}
 
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
               {[
