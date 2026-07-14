@@ -67,6 +67,9 @@ export function Header() {
       : `/dashboard/${user.role}`
     : `/signin?next=${encodeURIComponent(pathname)}`;
   const accountLabel = user ? user.name.split(" ")[0] : t("account");
+  const hideHeader = pathname === "/signin" || pathname === "/signup";
+
+  if (hideHeader) return null;
 
   const secondaryNavLinks = [
     { href: "/shop", label: t("marketplace"), Icon: Store },
