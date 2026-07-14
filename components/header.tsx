@@ -117,7 +117,7 @@ export function Header() {
             type="button"
             onClick={() => {
               if (pathname?.startsWith("/shop")) {
-                setShowCategories((v) => !v);
+                setShowCategories(!showCategories);
               } else {
                 setShowCategories(true);
                 router.push("/shop");
