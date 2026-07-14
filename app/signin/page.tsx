@@ -26,7 +26,7 @@ export default async function SignInPage() {
         <Suspense fallback={<div className="text-sm text-muted">Loading secure sign in...</div>}><AuthForm mode="signin" /></Suspense>
       </div>
       <div className="relative hidden lg:block">
-        <Image src="/images/simba-salt-vinegar.jpg" alt="Fresh Simba marketplace products from Rwanda" fill className="object-cover" sizes="50vw" />
+        <Image src="/images/landing.jpg" alt="Fresh Simba marketplace products from Rwanda" fill className="object-cover" sizes="50vw" />
         <div className="absolute inset-0 bg-black/15" />
       </div>
     </div>
