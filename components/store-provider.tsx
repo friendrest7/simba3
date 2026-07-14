@@ -82,6 +82,8 @@ type StoreContextValue = {
   setCurrency: (currency: CurrencyCode) => void;
   setSelectedBranchId: (branchId: string) => void;
   setLanguage: (language: LanguageCode) => void;
+  showCategories: boolean;
+  setShowCategories: (visible: boolean) => void;
   t: (key: string) => string;
   toggleSavedProduct: (productId: string) => void;
   addManagedProduct: (product: Product) => void;
@@ -122,6 +124,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [savedProductIds, setSavedProductIds] = useState<string[]>([]);
   const [managedProducts, setManagedProducts] = useState<Product[]>([]);
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
+  const [showCategories, setShowCategoriesState] = useState(false);
   const [ready, setReady] = useState(false);
   const lastSyncedPayloadRef = useRef<{ userId: string; signature: string } | null>(null);
   const [accountStateReady, setAccountStateReady] = useState(false);
@@ -138,12 +141,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const savedProducts = localStorage.getItem("simba-saved-products");
     const savedManagedProducts = localStorage.getItem("simba-managed-products");
     const savedForLaterRaw = localStorage.getItem("simba-saved-for-later");
+    const savedShowCategories = localStorage.getItem("simba-show-categories");
 
     try {
       if (savedCart) setCart(JSON.parse(savedCart));
       if (savedProducts) setSavedProductIds(JSON.parse(savedProducts));
       if (savedManagedProducts) setManagedProducts(JSON.parse(savedManagedProducts));
       if (savedForLaterRaw) setSavedForLater(JSON.parse(savedForLaterRaw));
+      if (savedShowCategories === "true") setShowCategoriesState(true);
     } catch {
       localStorage.removeItem("simba-cart");
       localStorage.removeItem("simba-saved-products");
@@ -154,6 +159,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (savedCurrency && Object.hasOwn({ RWF: true, ZAR: true, USD: true, EUR: true, GBP: true, BWP: true }, savedCurrency)) setCurrencyState(savedCurrency);
     if (savedBranchId && branches.some((branch) => branch.id === savedBranchId)) setSelectedBranchIdState(savedBranchId);
     if (savedLanguage && languageCodes.includes(savedLanguage)) setLanguageState(savedLanguage);
+    if (savedShowCategories === "true") setShowCategoriesState(true);
     setReady(true);
   }, []);
 
@@ -343,10 +349,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("simba-saved-products", JSON.stringify(savedProductIds));
     localStorage.setItem("simba-managed-products", JSON.stringify(managedProducts));
     localStorage.setItem("simba-saved-for-later", JSON.stringify(savedForLater));
+    localStorage.setItem("simba-show-categories", String(showCategories));
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.dataset.accent = accent;
     document.documentElement.lang = language;
-  }, [cart, theme, accent, currency, selectedBranchId, language, savedProductIds, managedProducts, savedForLater, ready]);
+  }, [cart, theme, accent, currency, selectedBranchId, language, savedProductIds, managedProducts, savedForLater, showCategories, ready]);
 
   const addToCart = (product: Product, quantity = 1) => {
     if (product.stock <= 0) return;
@@ -418,6 +425,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCurrency: setCurrencyState,
     setSelectedBranchId: setSelectedBranchIdState,
     setLanguage: setLanguageState,
+    showCategories,
+    setShowCategories: setShowCategoriesState,
     t: (key) => translate(key as never, language) || key,
     toggleSavedProduct: (productId) => setSavedProductIds((items) =>
       items.includes(productId) ? items.filter((id) => id !== productId) : [...items, productId]),

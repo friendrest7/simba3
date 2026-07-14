@@ -18,7 +18,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Logo } from "./logo";
 import { LanguageCode, useStore } from "./store-provider";
 import { branches } from "@/lib/data";
@@ -42,8 +42,33 @@ export function Header() {
     language,
     setLanguage,
     savedProductIds,
+    showCategories,
+    setShowCategories,
     t,
   } = useStore();
+
+  const [branchMenuOpen, setBranchMenuOpen] = useState(false);
+  const branchButtonRef = useRef<HTMLButtonElement | null>(null);
+  const branchPanelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent | TouchEvent) {
+      if (!branchMenuOpen) return;
+      const target = e.target as Node;
+      if (branchButtonRef.current?.contains(target)) return;
+      if (branchPanelRef.current?.contains(target)) return;
+      setBranchMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setBranchMenuOpen(false); }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("touchstart", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("touchstart", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [branchMenuOpen]);
 
   function submitSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -84,121 +109,131 @@ export function Header() {
       style={{ boxShadow: "0 1px 0 rgb(var(--brand) / .35), 0 10px 24px rgb(0 0 0 / .14)" }}
     >
       {/* ── Main bar ── */}
-      <div className="mx-auto flex min-h-[61px] max-w-[1500px] items-center gap-2 px-3 py-2 sm:px-5 lg:gap-3 lg:px-6">
+      <div className="mx-auto flex min-h-[80px] max-w-[1500px] items-center gap-4 px-3 py-3 sm:px-5 lg:gap-6 lg:px-6">
 
-        <Logo />
-
-        <Link
-          href="/shop"
-          className="hidden h-8 shrink-0 items-center rounded-md bg-brand px-2.5 text-[11px] font-black text-white shadow-sm transition hover:bg-brand/90 lg:flex"
-        >
-          {t("allCategories")}
-        </Link>
-
-        <Link
-          href="/trending"
-          className="hidden h-8 shrink-0 items-center gap-2 rounded-full border border-brand/20 bg-white/80 px-3 text-[11px] font-black text-ink transition hover:border-brand hover:bg-brand/10 lg:inline-flex dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-        >
-          <Flame className="h-3.5 w-3.5 text-brand dark:text-white" />
-          <span>Trending</span>
-        </Link>
-
-        {/* Search bar — takes all available middle space, matches shop style */}
-        <form onSubmit={submitSearch} className="relative hidden flex-1 md:flex md:items-center">
-          <Search className="input-icon" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("search")}
-            className="form-input pl-11 pr-12"
-          />
-          <button
-            type="submit"
-            className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md bg-brand text-white transition hover:bg-brand/90"
-            aria-label={t("searchProducts")}
-          >
-            <Search className="h-4 w-4" />
-          </button>
-        </form>
-
-        {/* Right-side nav */}
-        <nav className="flex shrink-0 items-center gap-1">
-
-          {/* Language — visible on lg+ */}
-          <label
-            className="hidden h-8 cursor-pointer items-center gap-1.5 rounded-md border border-brand/30 bg-white px-2 text-ink lg:flex dark:border-white/20 dark:bg-white/10 dark:text-white"
-            title="Select language"
-          >
-            <Languages className="h-3.5 w-3.5 shrink-0 text-brand dark:text-white" />
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-              className="w-16 bg-transparent text-[10px] font-black text-ink outline-none dark:text-white [&>option]:text-black"
-            >
-              {languageCodes.map((code) => (
-                <option key={code} value={code}>{languageLabels[code]}</option>
-              ))}
-            </select>
-          </label>
-
-          {/* Theme toggle — always visible */}
+        <div className="flex items-center gap-3 relative">
+          <Logo />
           <button
             type="button"
-            onClick={toggleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand/30 bg-white text-ink transition hover:bg-brand/10 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-            aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
-            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            onClick={() => {
+              if (pathname?.startsWith("/shop")) {
+                setShowCategories((v) => !v);
+              } else {
+                setShowCategories(true);
+                router.push("/shop");
+              }
+            }}
+            aria-expanded={showCategories}
+            className={`hidden md:inline-flex items-center rounded-md px-3 py-1 text-sm font-black text-white shadow-sm ${showCategories && pathname?.startsWith("/shop") ? "bg-brand/90 ring-2 ring-brand/30" : "bg-brand"}`}
           >
-            {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            {t("allCategories")}
           </button>
 
-          {/* Account / Sign out */}
-          {user ? (
+          {/* Visual branch dropdown for desktop */}
+          <div className="hidden md:inline-flex items-center relative">
             <button
+              ref={branchButtonRef}
               type="button"
-              onClick={handleSignOut}
-              className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+              onClick={() => setBranchMenuOpen((v) => !v)}
+              className="h-9 inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-medium text-ink dark:bg-white/5 dark:text-white"
+              aria-haspopup="true"
+              aria-expanded={branchMenuOpen}
             >
-              <UserRound />
-              <span>{t("signout")}</span>
+              <span className="font-semibold truncate max-w-[160px]">{branches.find((b) => b.id === selectedBranchId)?.name || "Select branch"}</span>
+              <ChevronDown className="h-4 w-4" />
             </button>
-          ) : (
-            <Link href={accountHref} className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-              <UserRound />
-              <span>{accountLabel}</span>
-            </Link>
-          )}
 
-          {/* Cart */}
-          <Link href="/cart" className="header-action bg-brand/10 text-ink hover:bg-brand/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-            <span className="relative">
-              <ShoppingCart />
-              {!!cartCount && <b className="action-count">{cartCount}</b>}
-            </span>
-            <span>{t("cart")}</span>
+            {branchMenuOpen && (
+              <div ref={branchPanelRef} className="absolute left-0 mt-2 w-72 rounded-md border border-line bg-white shadow-lg dark:bg-[#0f0f0f] z-50">
+                <ul className="max-h-64 overflow-auto">
+                  {branches.map((b) => (
+                    <li key={b.id}>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedBranchId(b.id); setBranchMenuOpen(false); }}
+                        className="w-full text-left px-4 py-3 hover:bg-brand/5 dark:hover:bg-white/5"
+                      >
+                        <div className="font-bold text-sm text-ink dark:text-white">{b.name}</div>
+                        <div className="text-xs text-muted">{b.city} · {b.province}</div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <form onSubmit={submitSearch} className="hidden md:flex flex-1 items-center mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-ink/60 h-5 w-5" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("search")}
+              className="w-full h-12 rounded-full border-2 border-gray-200 pl-14 pr-44 text-sm font-semibold focus:outline-none focus:ring-0 focus:border-brand"
+            />
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-[rgb(var(--brand))] px-6 py-2 text-white font-black shadow-md hover:brightness-90"
+              aria-label={t("searchProducts")}
+            >
+              <span className="hidden sm:inline">Search</span>
+              <Search className="sm:hidden h-5 w-5" />
+            </button>
+          </div>
+        </form>
+
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/trending" className="hidden lg:inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black bg-white/90 dark:bg-black dark:text-white hover:bg-brand/5 dark:hover:bg-white/5">
+            <Flame className="h-4 w-4 text-brand" />
+            <span className="hidden lg:inline">Trending</span>
           </Link>
-
-          {/* Dropdown chevron — desktop */}
           <button
             type="button"
             onClick={() => setSecondaryNavOpen((v) => !v)}
-            className="hidden h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:grid dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            className="hidden lg:inline-flex h-9 w-9 items-center justify-center rounded-md border border-brand/25 bg-white text-ink dark:bg-black dark:text-white hover:bg-brand/10 dark:hover:bg-white/10"
             aria-label={secondaryNavOpen ? "Close menu" : "Open menu"}
             aria-expanded={secondaryNavOpen}
           >
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${secondaryNavOpen ? "rotate-180" : ""}`} />
           </button>
+        </div>
 
-          {/* Hamburger — mobile */}
+        <nav className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            className="grid h-8 w-8 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={toggleTheme}
+            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md border border-brand/30 bg-white text-ink transition hover:bg-brand/10 dark:border-white/20 dark:bg-white/10 dark:text-white"
+            aria-label={theme === "light" ? t("darkMode") : t("lightMode")}
+            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
           >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
 
+          {user ? (
+            <button type="button" onClick={handleSignOut} className="hidden md:inline-flex items-center gap-2 rounded-md px-2 py-0.5 text-xs font-semibold hover:bg-brand/5">
+              <UserRound className="h-4 w-4" />
+              <span className="hidden lg:inline">{t("signout")}</span>
+            </button>
+          ) : (
+            <Link href={accountHref} className="inline-flex items-center gap-2 rounded-md px-2 py-0.5 text-xs font-semibold hover:bg-brand/5">
+              <UserRound className="h-4 w-4" />
+              <span className="hidden lg:inline">{accountLabel}</span>
+            </Link>
+          )}
+
+          <Link href="/cart" className="inline-flex items-center gap-2 rounded-md px-2 py-0.5 text-xs font-semibold hover:bg-brand/5">
+            <span className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {!!cartCount && <b className="action-count">{cartCount}</b>}
+            </span>
+            <span className="hidden sm:inline">{t("cart")}</span>
+          </Link>
+
+          <button type="button" onClick={() => setMenuOpen((v) => !v)} className="grid h-9 w-9 place-items-center rounded-md border border-brand/25 bg-white text-ink transition hover:bg-brand/10 lg:hidden">
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </nav>
       </div>
 
@@ -251,9 +286,9 @@ export function Header() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("search")}
-              className="h-11 w-full rounded-md border-2 border-brand bg-white pl-11 pr-12 text-sm font-semibold text-ink outline-none placeholder:text-muted focus:ring-4 focus:ring-brand/20"
+              className="h-11 w-full rounded-md border-2 border-brand bg-white pl-11 pr-12 text-sm font-semibold text-ink outline-none placeholder:text-muted focus:outline-none focus:ring-0 focus:border-brand"
             />
-            <button type="submit" className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-md bg-brand text-white">
+            <button type="submit" className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-md bg-[rgb(var(--brand))] text-white">
               <Search className="h-4 w-4" />
             </button>
           </form>
@@ -273,7 +308,7 @@ export function Header() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-                className="bg-transparent text-xs font-black text-ink outline-none dark:text-white [&>option]:text-black"
+                className="bg-transparent text-xs font-black text-ink outline-none dark:text-white dark:bg-black [&>option]:text-black"
               >
                 {languageCodes.map((code) => (
                   <option key={code} value={code}>{languageLabels[code]}</option>
@@ -282,10 +317,10 @@ export function Header() {
             </label>
             <label className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-canvas px-3 py-2 text-xs font-black text-ink">
               <MapPin className="h-4 w-4 text-brand" />
-              <select
+                <select
                 value={selectedBranchId}
                 onChange={(e) => setSelectedBranchId(e.target.value)}
-                className="max-w-[60px] bg-transparent text-[10px] font-black text-ink outline-none [&>option]:text-black"
+                className="max-w-[60px] bg-transparent text-[10px] font-black text-ink outline-none dark:text-white dark:bg-black [&>option]:text-black"
               >
                 {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>

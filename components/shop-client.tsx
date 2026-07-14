@@ -75,6 +75,7 @@ export function ShopClient({
   const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { showCategories, setShowCategories } = useStore();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -158,11 +159,21 @@ export function ShopClient({
   const filterControls = (
     <>
       <div>
-        <label className="form-label" htmlFor="catalog-category">{t("category")}</label>
-        <select id="catalog-category" value={category} onChange={(event) => { resetPage(setCategory, event.target.value); setSubcategory(""); }} className="form-input">
-          <option value="All">{t("allCategories")}</option>
-          {categories.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
+        <label className="form-label">{t("category")}</label>
+        {!showCategories ? (
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setShowCategories(true)} className="button-secondary">{t("shopCategories")}</button>
+            <button type="button" onClick={() => { setCategory("All"); setSubcategory(""); setShowCategories(false); }} className="button-ghost">Reset</button>
+          </div>
+        ) : (
+          <>
+            <select id="catalog-category" value={category} onChange={(event) => { resetPage(setCategory, event.target.value); setSubcategory(""); }} className="form-input">
+              <option value="All">{t("allCategories")}</option>
+              {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+            <button type="button" onClick={() => setShowCategories(false)} className="button-ghost mt-2">Hide</button>
+          </>
+        )}
       </div>
       <div>
         <label className="form-label" htmlFor="catalog-subcategory">Subcategory</label>
